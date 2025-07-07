@@ -602,6 +602,11 @@
             document.getElementById('recipeInstructions').value = '';
         }
 
+        // Event Listeners - MOET EERST!
+        addRecipeBtn.addEventListener('click', openModal);
+        closeModal.addEventListener('click', closeModalFunc);
+        cancelBtn.addEventListener('click', closeModalFunc);
+
         // URL/Manual toggle functionality
         const manualBtn = document.getElementById('manualBtn');
         const urlBtn = document.getElementById('urlBtn');
@@ -877,6 +882,27 @@
             
             return { success: false };
         }
+
+        copyListBtn.addEventListener('click', () => {
+            const uncheckedItems = shoppingList
+                .filter(item => !item.checked)
+                .map(item => item.text)
+                .join('\n');
+            
+            if (uncheckedItems) {
+                navigator.clipboard.writeText(uncheckedItems).then(() => {
+                    alert('Boodschappenlijst gekopieerd! 📋\nPlak in je iPhone Herinneringen app.');
+                });
+            }
+        });
+
+        clearListBtn.addEventListener('click', () => {
+            if (confirm('Wil je de hele boodschappenlijst wissen?')) {
+                shoppingList = [];
+                saveData();
+                renderShoppingList();
+            }
+        });
         closeModal.addEventListener('click', closeModalFunc);
         cancelBtn.addEventListener('click', closeModalFunc);
 
