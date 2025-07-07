@@ -433,6 +433,69 @@
     </div>
 
     <script>
+        <!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
+<script>
+// Jouw Firebase config (uit stap 3.3)
+const firebaseConfig = {
+  // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDwCytKLyfCWkaRvDoVVu_hUrTpuK3ef4Y",
+  authDomain: "avondeten-inspiratie.firebaseapp.com",
+  projectId: "avondeten-inspiratie",
+  storageBucket: "avondeten-inspiratie.firebasestorage.app",
+  messagingSenderId: "530227974284",
+  appId: "1:530227974284:web:e101bcc416b51e0a58aba9",
+  measurementId: "G-7JS0X2R3DB"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Vervang localStorage functies
+function saveData() {
+  // Recipes opslaan
+  db.collection('recipes').doc('shared').set({
+    recipes: recipes,
+    lastUpdated: new Date()
+  });
+  
+  // Shopping list opslaan  
+  db.collection('shopping').doc('shared').set({
+    items: shoppingList,
+    lastUpdated: new Date()
+  });
+}
+
+// Data laden bij start
+db.collection('recipes').doc('shared').get().then(doc => {
+  if (doc.exists) {
+    recipes = doc.data().recipes || [];
+    renderRecipes();
+  }
+});
+
+db.collection('shopping').doc('shared').get().then(doc => {
+  if (doc.exists) {
+    shoppingList = doc.data().items || [];
+    renderShoppingList();
+  }
+});
+</script>
         // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('data:application/javascript;base64,Y29uc3QgQ0FDSEVfTkFNRSA9ICdhdm9uZGV0ZW4tdjEnOwpjb25zdCB1cmxzVG9DYWNoZSA9IFsnLyddOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4gewogIGV2ZW50LndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFX05BTUUpLnRoZW4oY2FjaGUgPT4gewogICAgICByZXR1cm4gY2FjaGUuYWRkQWxsKHVybHNUb0NhY2hlKTsKICAgIH0pCiAgKTsKfSk7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZXZlbnQgPT4gewogIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpLnRoZW4ocmVzcG9uc2UgPT4gewogICAgICByZXR1cm4gcmVzcG9uc2UgfHwgZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgICB9KQogICk7Cn0pOw==')
