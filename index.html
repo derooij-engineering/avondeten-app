@@ -494,6 +494,7 @@
         // App State
         let recipes = [];
         let shoppingList = [];
+        let editingRecipeId = null;
 
         // Firebase save functie
         function saveData() {
@@ -623,9 +624,11 @@
             document.getElementById('recipeTags').value = '';
             document.getElementById('recipeIngredients').value = '';
             document.getElementById('recipeInstructions').value = '';
+            document.getElementById('recipeUrl').value = '';
+            document.getElementById('extractStatus').textContent = '';
         }
 
-        // Event Listeners - MOET EERST!
+        // Event Listeners
         addRecipeBtn.addEventListener('click', openModal);
         closeModal.addEventListener('click', closeModalFunc);
         cancelBtn.addEventListener('click', closeModalFunc);
@@ -1099,8 +1102,6 @@
         }
 
         // Edit recipe functionality
-        let editingRecipeId = null;
-
         function editRecipe(id) {
             const recipe = recipes.find(r => r.id === id);
             if (!recipe) return;
@@ -1157,54 +1158,8 @@
                 });
             }).join('\n');
         }
-            const uncheckedItems = shoppingList
-                .filter(item => !item.checked)
-                .map(item => item.text)
-                .join('\n');
-            
-            if (uncheckedItems) {
-                navigator.clipboard.writeText(uncheckedItems).then(() => {
-                    alert('Boodschappenlijst gekopieerd! 📋\nPlak in je iPhone Herinneringen app.');
-                });
-            }
-        });
 
-        clearListBtn.addEventListener('click', () => {
-            if (confirm('Wil je de hele boodschappenlijst wissen?')) {
-                shoppingList = [];
-                saveData();
-                renderShoppingList();
-            }
-        });
-        closeModal.addEventListener('click', closeModalFunc);
-        cancelBtn.addEventListener('click', closeModalFunc);
-
-        saveRecipeBtn.addEventListener('click', () => {
-            const title = document.getElementById('recipeTitle').value.trim();
-            const ingredients = document.getElementById('recipeIngredients').value.trim();
-            
-            if (!title || !ingredients) {
-                alert('Vul minimaal titel en ingrediënten in');
-                return;
-            }
-
-            const recipe = {
-                id: Date.now(),
-                title,
-                prepTime: document.getElementById('recipePrepTime').value,
-                servings: document.getElementById('recipeServings').value,
-                tags: document.getElementById('recipeTags').value.split(',').map(t => t.trim()).filter(t => t),
-                ingredients: ingredients.split('\n').filter(i => i.trim()),
-                instructions: document.getElementById('recipeInstructions').value,
-                dateAdded: new Date().toLocaleDateString('nl-NL')
-            };
-
-            recipes.unshift(recipe);
-            saveData();
-            renderRecipes();
-            closeModalFunc();
-        });
-
+        // Save recipe
         saveRecipeBtn.addEventListener('click', () => {
             const title = document.getElementById('recipeTitle').value.trim();
             const ingredients = document.getElementById('recipeIngredients').value.trim();
@@ -1243,6 +1198,7 @@
             closeModalFunc();
         });
 
+        // Shopping list buttons
         copyListBtn.addEventListener('click', () => {
             const uncheckedItems = shoppingList
                 .filter(item => !item.checked)
@@ -1318,14 +1274,16 @@
                 <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
                     <div style="display: flex; justify-content: space-between; align-items: start;">
                         <h3 class="recipe-title">${recipe.title}</h3>
-                        <button onclick="event.stopPropagation(); deleteRecipe(${recipe.id})" 
-                                style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem; margin-left: 8px;">
-                            🗑️
-                        </button>
-                        <button onclick="event.stopPropagation(); editRecipe(${recipe.id})" 
-                                style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 1.2rem;">
-                            ✏️
-                        </button>
+                        <div style="display: flex; gap: 4px;">
+                            <button onclick="event.stopPropagation(); editRecipe(${recipe.id})" 
+                                    style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 1.2rem;">
+                                ✏️
+                            </button>
+                            <button onclick="event.stopPropagation(); deleteRecipe(${recipe.id})" 
+                                    style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">
+                                🗑️
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="recipe-meta">
