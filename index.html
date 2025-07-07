@@ -673,15 +673,49 @@
         // Recipe extraction function
         async function extractRecipeFromUrl(url) {
             try {
-                // Create a proxy URL to avoid CORS issues
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                // Try multiple proxy services for better reliability
+                const proxies = [
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+                    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+                ];
                 
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
-                const htmlContent = data.contents;
+                let htmlContent = null;
+                let workingProxy = null;
+                
+                // Try each proxy until one works
+                for (let proxy of proxies) {
+                    try {
+                        console.log(`Trying proxy: ${proxy}`);
+                        const response = await fetch(proxy);
+                        
+                        if (response.ok) {
+                            const data = await response.text();
+                            // Handle different proxy response formats
+                            if (proxy.includes('allorigins')) {
+                                const jsonData = JSON.parse(data);
+                                htmlContent = jsonData.contents;
+                            } else {
+                                htmlContent = data;
+                            }
+                            
+                            if (htmlContent && htmlContent.length > 1000) {
+                                workingProxy = proxy;
+                                console.log(`Success with proxy: ${proxy}`);
+                                break;
+                            }
+                        }
+                    } catch (error) {
+                        console.log(`Proxy failed: ${proxy}`, error);
+                        continue;
+                    }
+                }
                 
                 if (!htmlContent) {
-                    return { success: false, error: 'Kon webpage niet laden' };
+                    return { 
+                        success: false, 
+                        error: 'Kon website niet laden via proxy. Probeer een andere URL of voer handmatig in.' 
+                    };
                 }
 
                 // Parse the HTML content
@@ -695,7 +729,10 @@
                 
             } catch (error) {
                 console.error('Extraction error:', error);
-                return { success: false, error: 'Netwerkfout bij ophalen recept' };
+                return { 
+                    success: false, 
+                    error: 'Technische fout bij ophalen. Controleer je internetverbinding en probeer opnieuw.' 
+                };
             }
         }
 
@@ -920,33 +957,93 @@
         function extractFromGenericHtml(doc) {
             try {
                 // Try to find title
-                const title = doc.querySelector('h1')?.textContent?.trim() || 
-                             doc.querySelector('.recipe-title, .entry-title')?.textContent?.trim() || '';
+                const titleSelectors = [
+                    'h1',
+                    '.recipe-title', 
+                    '.entry-title',
+                    '[class*="title"]',
+                    'title'
+                ];
                 
-                // Try to find ingredients
+                let title = '';
+                for (let selector of titleSelectors) {
+                    const element = doc.querySelector(selector);
+                    if (element) {
+                        title = element.textContent?.trim() || '';
+                        if (title && title.length > 3) break;
+                    }
+                }
+                
+                // Try to find ingredients with better patterns
                 const ingredientSelectors = [
                     '.ingredients li',
-                    '.recipe-ingredients li', 
-                    'ul li:contains("gram")',
-                    'ul li:contains("ml")',
+                    '.recipe-ingredients li',
+                    'ul li',
+                    'ol li',
+                    '[class*="ingredient"] li',
                     'li[class*="ingredient"]'
                 ];
                 
                 let ingredients = '';
                 for (let selector of ingredientSelectors) {
                     const elements = doc.querySelectorAll(selector);
-                    if (elements.length > 2) { // At least 3 ingredients
-                        ingredients = Array.from(elements).map(el => el.textContent.trim()).join('\n');
-                        break;
+                    if (elements.length >= 3) { // At least 3 items
+                        const possibleIngredients = Array.from(elements).map(el => {
+                            const text = el.textContent?.trim() || '';
+                            return text.replace(/\s+/g, ' ');
+                        }).filter(text => {
+                            // Filter for likely ingredients (contains numbers, common units, etc.)
+                            return text.length > 2 && 
+                                   (text.match(/\d/) || 
+                                    text.match(/gram|ml|liter|stuks|eetlepel|theelepel|kilo|pond/) ||
+                                    text.length < 50); // Not too long (likely not instructions)
+                        });
+                        
+                        if (possibleIngredients.length >= 3) {
+                            ingredients = possibleIngredients.join('\n');
+                            break;
+                        }
                     }
                 }
 
-                if (title && ingredients) {
+                // Try to find instructions
+                const instructionSelectors = [
+                    '.instructions li',
+                    '.recipe-method li',
+                    '.directions li',
+                    '.preparation li',
+                    'ol li',
+                    '[class*="instruction"] li'
+                ];
+                
+                let instructions = '';
+                for (let selector of instructionSelectors) {
+                    const elements = doc.querySelectorAll(selector);
+                    if (elements.length >= 2) {
+                        const possibleInstructions = Array.from(elements).map((el, index) => {
+                            const text = el.textContent?.trim() || '';
+                            return text.length > 10 ? `${index + 1}. ${text.replace(/\s+/g, ' ')}` : '';
+                        }).filter(text => text.length > 10);
+                        
+                        if (possibleInstructions.length >= 2) {
+                            instructions = possibleInstructions.join('\n\n');
+                            break;
+                        }
+                    }
+                }
+
+                console.log('Generic extraction results:', { 
+                    title, 
+                    ingredientsFound: ingredients.split('\n').length,
+                    instructionsFound: instructions.split('\n').length 
+                });
+
+                if (title && (ingredients || instructions)) {
                     return {
                         success: true,
                         title,
-                        ingredients,
-                        instructions: '',
+                        ingredients: ingredients || 'Geen ingrediënten gevonden - vul handmatig aan',
+                        instructions: instructions || 'Geen instructies gevonden - vul handmatig aan',
                         prepTime: '',
                         servings: '',
                         tags: 'generic'
