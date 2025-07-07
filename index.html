@@ -422,6 +422,21 @@
                 </div>
             </div>
 
+            <!-- Portion Calculator -->
+            <div id="portionSection" style="display: none; margin-bottom: 20px; padding: 12px; background: #f0f9ff; border-radius: 8px; border: 1px solid #0ea5e9;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <label style="font-weight: 500; color: #0c4a6e;">🍽️ Aanpassen voor:</label>
+                    <input id="newPortions" type="number" min="1" max="20" value="3" style="width: 60px; padding: 6px; border: 1px solid #bae6fd; border-radius: 4px;">
+                    <span style="color: #0c4a6e;">personen</span>
+                    <button type="button" id="adjustPortionsBtn" class="btn" style="background: #0ea5e9; color: white; padding: 6px 12px; font-size: 0.875rem;">
+                        🔄 Aanpassen
+                    </button>
+                </div>
+                <div id="portionNote" style="font-size: 0.875rem; color: #075985;">
+                    💡 Tip: Dit past automatisch alle hoeveelheden aan in de ingrediënten
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Titel *</label>
                 <input id="recipeTitle" type="text" class="form-input" placeholder="Heerlijke pasta carbonara">
@@ -591,6 +606,14 @@
             addRecipeModal.style.display = 'none';
             document.body.style.overflow = 'auto';
             clearForm();
+            
+            // Reset modal to add mode
+            editingRecipeId = null;
+            document.querySelector('#addRecipeModal h2').textContent = 'Nieuw Recept';
+            document.getElementById('saveRecipeBtn').textContent = 'Recept Opslaan';
+            document.getElementById('portionSection').style.display = 'none';
+            document.getElementById('portionNote').innerHTML = '💡 Tip: Dit past automatisch alle hoeveelheden aan in de ingrediënten';
+            document.getElementById('portionNote').style.color = '#075985';
         }
 
         function clearForm() {
@@ -1075,7 +1098,65 @@
             return { success: false };
         }
 
-        copyListBtn.addEventListener('click', () => {
+        // Edit recipe functionality
+        let editingRecipeId = null;
+
+        function editRecipe(id) {
+            const recipe = recipes.find(r => r.id === id);
+            if (!recipe) return;
+
+            editingRecipeId = id;
+            
+            // Fill form with existing data
+            document.getElementById('recipeTitle').value = recipe.title;
+            document.getElementById('recipePrepTime').value = recipe.prepTime || '';
+            document.getElementById('recipeServings').value = recipe.servings || '';
+            document.getElementById('recipeTags').value = recipe.tags ? recipe.tags.join(', ') : '';
+            document.getElementById('recipeIngredients').value = recipe.ingredients ? recipe.ingredients.join('\n') : '';
+            document.getElementById('recipeInstructions').value = recipe.instructions || '';
+            
+            // Change modal title and button
+            document.querySelector('#addRecipeModal h2').textContent = 'Recept Bewerken';
+            document.getElementById('saveRecipeBtn').textContent = 'Wijzigingen Opslaan';
+            
+            // Show portion adjuster
+            document.getElementById('portionSection').style.display = 'block';
+            
+            openModal();
+        }
+
+        // Portion adjustment functionality
+        document.getElementById('adjustPortionsBtn').addEventListener('click', () => {
+            const newPortions = parseInt(document.getElementById('newPortions').value);
+            const currentIngredients = document.getElementById('recipeIngredients').value;
+            
+            if (!newPortions || newPortions < 1) {
+                alert('Vul een geldig aantal personen in');
+                return;
+            }
+
+            const adjustedIngredients = adjustIngredientPortions(currentIngredients, newPortions);
+            document.getElementById('recipeIngredients').value = adjustedIngredients;
+            document.getElementById('recipeServings').value = `${newPortions} personen`;
+            
+            document.getElementById('portionNote').innerHTML = `✅ Ingrediënten aangepast voor ${newPortions} personen!`;
+            document.getElementById('portionNote').style.color = '#059669';
+        });
+
+        function adjustIngredientPortions(ingredientsText, newPortions) {
+            const lines = ingredientsText.split('\n');
+            const originalPortions = 4; // Default assumption, could be made smarter
+            const multiplier = newPortions / originalPortions;
+            
+            return lines.map(line => {
+                // Match numbers at the start of ingredient lines
+                return line.replace(/^(\d+(?:\.\d+)?)\s*(gram|g|ml|liter|l|kg|stuks?|eetlepels?|theelepels?|el|tl)\b/i, (match, amount, unit) => {
+                    const originalAmount = parseFloat(amount);
+                    const newAmount = Math.round(originalAmount * multiplier * 10) / 10; // Round to 1 decimal
+                    return `${newAmount} ${unit}`;
+                });
+            }).join('\n');
+        }
             const uncheckedItems = shoppingList
                 .filter(item => !item.checked)
                 .map(item => item.text)
@@ -1119,6 +1200,44 @@
             };
 
             recipes.unshift(recipe);
+            saveData();
+            renderRecipes();
+            closeModalFunc();
+        });
+
+        saveRecipeBtn.addEventListener('click', () => {
+            const title = document.getElementById('recipeTitle').value.trim();
+            const ingredients = document.getElementById('recipeIngredients').value.trim();
+            
+            if (!title || !ingredients) {
+                alert('Vul minimaal titel en ingrediënten in');
+                return;
+            }
+
+            const recipe = {
+                id: editingRecipeId || Date.now(),
+                title,
+                prepTime: document.getElementById('recipePrepTime').value,
+                servings: document.getElementById('recipeServings').value,
+                tags: document.getElementById('recipeTags').value.split(',').map(t => t.trim()).filter(t => t),
+                ingredients: ingredients.split('\n').filter(i => i.trim()),
+                instructions: document.getElementById('recipeInstructions').value,
+                dateAdded: editingRecipeId ? 
+                    recipes.find(r => r.id === editingRecipeId)?.dateAdded || new Date().toLocaleDateString('nl-NL') :
+                    new Date().toLocaleDateString('nl-NL')
+            };
+
+            if (editingRecipeId) {
+                // Update existing recipe
+                const index = recipes.findIndex(r => r.id === editingRecipeId);
+                if (index !== -1) {
+                    recipes[index] = recipe;
+                }
+            } else {
+                // Add new recipe
+                recipes.unshift(recipe);
+            }
+
             saveData();
             renderRecipes();
             closeModalFunc();
@@ -1200,8 +1319,12 @@
                     <div style="display: flex; justify-content: space-between; align-items: start;">
                         <h3 class="recipe-title">${recipe.title}</h3>
                         <button onclick="event.stopPropagation(); deleteRecipe(${recipe.id})" 
-                                style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">
+                                style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem; margin-left: 8px;">
                             🗑️
+                        </button>
+                        <button onclick="event.stopPropagation(); editRecipe(${recipe.id})" 
+                                style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 1.2rem;">
+                            ✏️
                         </button>
                     </div>
                     
