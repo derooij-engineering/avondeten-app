@@ -673,6 +673,8 @@
         // Recipe extraction function
         async function extractRecipeFromUrl(url) {
             try {
+                extractStatus.innerHTML = '🔄 Bezig met ophalen...';
+                
                 // Try multiple proxy services for better reliability
                 const proxies = [
                     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
@@ -683,10 +685,15 @@
                 let htmlContent = null;
                 let workingProxy = null;
                 
+                extractStatus.innerHTML = '🔄 Proberen verschillende servers...';
+                
                 // Try each proxy until one works
-                for (let proxy of proxies) {
+                for (let i = 0; i < proxies.length; i++) {
+                    const proxy = proxies[i];
                     try {
+                        extractStatus.innerHTML = `🔄 Server ${i + 1}/${proxies.length} proberen...`;
                         console.log(`Trying proxy: ${proxy}`);
+                        
                         const response = await fetch(proxy);
                         
                         if (response.ok) {
@@ -702,6 +709,7 @@
                             if (htmlContent && htmlContent.length > 1000) {
                                 workingProxy = proxy;
                                 console.log(`Success with proxy: ${proxy}`);
+                                extractStatus.innerHTML = '🔄 Data gevonden, analyseren...';
                                 break;
                             }
                         }
@@ -712,15 +720,26 @@
                 }
                 
                 if (!htmlContent) {
+                    console.log('No working proxy found');
                     return { 
                         success: false, 
-                        error: 'Kon website niet laden via proxy. Probeer een andere URL of voer handmatig in.' 
+                        error: 'Kon website niet laden. AH/Allerhande blokkeert waarschijnlijk automatische toegang. Probeer handmatig kopiëren.' 
                     };
                 }
+
+                console.log(`HTML content length: ${htmlContent.length}`);
+                console.log(`HTML preview: ${htmlContent.substring(0, 500)}`);
 
                 // Parse the HTML content
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlContent, 'text/html');
+                
+                // Debug: log what we can find
+                console.log('Page title:', doc.title);
+                console.log('H1 elements:', doc.querySelectorAll('h1').length);
+                console.log('All text content preview:', doc.body?.textContent?.substring(0, 300));
+                
+                extractStatus.innerHTML = '🔄 Receptgegevens zoeken...';
                 
                 // Try different extraction strategies
                 const extractedData = tryExtractStrategies(doc, url);
@@ -731,7 +750,7 @@
                 console.error('Extraction error:', error);
                 return { 
                     success: false, 
-                    error: 'Technische fout bij ophalen. Controleer je internetverbinding en probeer opnieuw.' 
+                    error: `Technische fout: ${error.message}. Probeer handmatig invoeren.` 
                 };
             }
         }
