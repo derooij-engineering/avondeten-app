@@ -718,7 +718,7 @@
             }
 
             // Strategy 2: Site-specific extractors
-            if (url.includes('allerhande.nl')) {
+            if (url.includes('allerhande.nl') || url.includes('ah.nl')) {
                 const allerhandeData = extractFromAllerhande(doc);
                 if (allerhandeData.success) {
                     return { ...allerhandeData, confidence: 85 };
@@ -784,23 +784,99 @@
 
         function extractFromAllerhande(doc) {
             try {
-                const title = doc.querySelector('h1')?.textContent?.trim() || '';
+                // Try multiple title selectors for AH
+                const title = doc.querySelector('h1, .recipe-header__title, [data-testhook="recipe-title"]')?.textContent?.trim() || '';
                 
-                const ingredientElements = doc.querySelectorAll('.recipe-ingredients li, .ingredients li, [data-test-id="ingredient"]');
-                const ingredients = Array.from(ingredientElements).map(el => el.textContent.trim()).join('\n');
+                // Try multiple ingredient selectors
+                let ingredients = '';
+                const ingredientSelectors = [
+                    '[data-testhook="recipe-ingredient"]',
+                    '.recipe-ingredients__item',
+                    '.ingredients-list__item',
+                    '.recipe-ingredient',
+                    'li[class*="ingredient"]',
+                    '.ah-ingredient'
+                ];
                 
-                const instructionElements = doc.querySelectorAll('.recipe-method li, .instructions li, .recipe-instructions li');
-                const instructions = Array.from(instructionElements).map(el => el.textContent.trim()).join('\n');
+                for (let selector of ingredientSelectors) {
+                    const elements = doc.querySelectorAll(selector);
+                    if (elements.length > 0) {
+                        ingredients = Array.from(elements).map(el => {
+                            // Clean up the text - remove extra whitespace and unwanted elements
+                            const text = el.textContent?.trim() || '';
+                            return text.replace(/\s+/g, ' ');
+                        }).filter(text => text.length > 0).join('\n');
+                        if (ingredients) break;
+                    }
+                }
                 
-                const prepTime = doc.querySelector('[data-test-id="duration"], .prep-time, .cooking-time')?.textContent?.trim() || '';
-                const servings = doc.querySelector('[data-test-id="portions"], .servings, .yield')?.textContent?.trim() || '';
+                // Try multiple instruction selectors
+                let instructions = '';
+                const instructionSelectors = [
+                    '[data-testhook="recipe-instruction"]',
+                    '.recipe-method__step',
+                    '.recipe-instructions__step',
+                    '.preparation-step',
+                    'ol li, .steps li'
+                ];
+                
+                for (let selector of instructionSelectors) {
+                    const elements = doc.querySelectorAll(selector);
+                    if (elements.length > 0) {
+                        instructions = Array.from(elements).map((el, index) => {
+                            const text = el.textContent?.trim() || '';
+                            return `${index + 1}. ${text.replace(/\s+/g, ' ')}`;
+                        }).filter(text => text.length > 3).join('\n\n');
+                        if (instructions) break;
+                    }
+                }
+                
+                // Try to find prep time
+                const prepTimeSelectors = [
+                    '[data-testhook="recipe-duration"]',
+                    '.recipe-time',
+                    '.prep-time',
+                    '.cooking-time',
+                    '[class*="duration"]',
+                    '[class*="time"]'
+                ];
+                
+                let prepTime = '';
+                for (let selector of prepTimeSelectors) {
+                    const element = doc.querySelector(selector);
+                    if (element) {
+                        prepTime = element.textContent?.trim() || '';
+                        if (prepTime) break;
+                    }
+                }
+                
+                // Try to find servings
+                const servingSelectors = [
+                    '[data-testhook="recipe-portions"]',
+                    '.recipe-portions',
+                    '.servings',
+                    '.yield',
+                    '[class*="portion"]',
+                    '[class*="serving"]'
+                ];
+                
+                let servings = '';
+                for (let selector of servingSelectors) {
+                    const element = doc.querySelector(selector);
+                    if (element) {
+                        servings = element.textContent?.trim() || '';
+                        if (servings) break;
+                    }
+                }
 
-                if (title && ingredients) {
+                console.log('AH Extraction results:', { title, ingredients: ingredients.substring(0, 100), instructions: instructions.substring(0, 100) });
+
+                if (title && (ingredients || instructions)) {
                     return {
                         success: true,
                         title,
-                        ingredients,
-                        instructions,
+                        ingredients: ingredients || 'Geen ingrediënten gevonden - vul handmatig aan',
+                        instructions: instructions || 'Geen instructies gevonden - vul handmatig aan',
                         prepTime,
                         servings,
                         tags: 'allerhande'
