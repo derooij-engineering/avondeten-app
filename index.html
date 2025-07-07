@@ -398,6 +398,30 @@
                 <button id="closeModal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
             </div>
             
+            <!-- URL/Manual Toggle -->
+            <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <button type="button" id="manualBtn" class="btn btn-primary" style="flex: 1;">
+                    ✏️ Handmatig
+                </button>
+                <button type="button" id="urlBtn" class="btn" style="flex: 1; background: #6b7280; color: white;">
+                    🔗 Van URL
+                </button>
+            </div>
+
+            <!-- URL Input (hidden by default) -->
+            <div id="urlSection" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Website URL *</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input id="recipeUrl" type="url" class="form-input" placeholder="https://www.allerhande.nl/recepten/pasta-carbonara">
+                        <button type="button" id="extractBtn" class="btn btn-success" style="white-space: nowrap;">
+                            🔍 Ophalen
+                        </button>
+                    </div>
+                    <div id="extractStatus" style="margin-top: 8px; font-size: 0.875rem; color: #6b7280;"></div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Titel *</label>
                 <input id="recipeTitle" type="text" class="form-input" placeholder="Heerlijke pasta carbonara">
@@ -578,8 +602,281 @@
             document.getElementById('recipeInstructions').value = '';
         }
 
-        // Event Listeners
-        addRecipeBtn.addEventListener('click', openModal);
+        // URL/Manual toggle functionality
+        const manualBtn = document.getElementById('manualBtn');
+        const urlBtn = document.getElementById('urlBtn');
+        const urlSection = document.getElementById('urlSection');
+        const extractBtn = document.getElementById('extractBtn');
+        const extractStatus = document.getElementById('extractStatus');
+        let currentMode = 'manual';
+
+        manualBtn.addEventListener('click', () => {
+            currentMode = 'manual';
+            manualBtn.className = 'btn btn-primary';
+            urlBtn.className = 'btn';
+            urlBtn.style.background = '#6b7280';
+            urlBtn.style.color = 'white';
+            urlSection.style.display = 'none';
+        });
+
+        urlBtn.addEventListener('click', () => {
+            currentMode = 'url';
+            urlBtn.className = 'btn btn-primary';
+            manualBtn.className = 'btn';
+            manualBtn.style.background = '#6b7280';
+            manualBtn.style.color = 'white';
+            urlSection.style.display = 'block';
+        });
+
+        // Recipe extraction from URL
+        extractBtn.addEventListener('click', async () => {
+            const url = document.getElementById('recipeUrl').value.trim();
+            if (!url) {
+                alert('Vul eerst een URL in');
+                return;
+            }
+
+            extractStatus.textContent = '🔄 Recept ophalen...';
+            extractBtn.disabled = true;
+
+            try {
+                const extractedData = await extractRecipeFromUrl(url);
+                
+                if (extractedData.success) {
+                    // Fill form with extracted data
+                    document.getElementById('recipeTitle').value = extractedData.title || '';
+                    document.getElementById('recipePrepTime').value = extractedData.prepTime || '';
+                    document.getElementById('recipeServings').value = extractedData.servings || '';
+                    document.getElementById('recipeIngredients').value = extractedData.ingredients || '';
+                    document.getElementById('recipeInstructions').value = extractedData.instructions || '';
+                    document.getElementById('recipeTags').value = extractedData.tags || '';
+                    
+                    extractStatus.innerHTML = `✅ Recept opgehaald! ${extractedData.confidence}% betrouwbaarheid`;
+                    extractStatus.style.color = '#10b981';
+                } else {
+                    extractStatus.innerHTML = `❌ ${extractedData.error}`;
+                    extractStatus.style.color = '#ef4444';
+                }
+            } catch (error) {
+                extractStatus.innerHTML = '❌ Fout bij ophalen recept. Probeer handmatig invoeren.';
+                extractStatus.style.color = '#ef4444';
+            }
+
+            extractBtn.disabled = false;
+        });
+
+        // Recipe extraction function
+        async function extractRecipeFromUrl(url) {
+            try {
+                // Create a proxy URL to avoid CORS issues
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                const htmlContent = data.contents;
+                
+                if (!htmlContent) {
+                    return { success: false, error: 'Kon webpage niet laden' };
+                }
+
+                // Parse the HTML content
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+                
+                // Try different extraction strategies
+                const extractedData = tryExtractStrategies(doc, url);
+                
+                return extractedData;
+                
+            } catch (error) {
+                console.error('Extraction error:', error);
+                return { success: false, error: 'Netwerkfout bij ophalen recept' };
+            }
+        }
+
+        function tryExtractStrategies(doc, url) {
+            let result = {
+                title: '',
+                ingredients: '',
+                instructions: '',
+                prepTime: '',
+                servings: '',
+                tags: '',
+                confidence: 0,
+                success: false
+            };
+
+            // Strategy 1: JSON-LD structured data (best)
+            const jsonLdData = extractFromJsonLd(doc);
+            if (jsonLdData.success) {
+                return { ...jsonLdData, confidence: 95 };
+            }
+
+            // Strategy 2: Site-specific extractors
+            if (url.includes('allerhande.nl')) {
+                const allerhandeData = extractFromAllerhande(doc);
+                if (allerhandeData.success) {
+                    return { ...allerhandeData, confidence: 85 };
+                }
+            }
+
+            if (url.includes('smulweb.nl')) {
+                const smulwebData = extractFromSmulweb(doc);
+                if (smulwebData.success) {
+                    return { ...smulwebData, confidence: 85 };
+                }
+            }
+
+            // Strategy 3: Generic HTML extraction (fallback)
+            const genericData = extractFromGenericHtml(doc);
+            if (genericData.success) {
+                return { ...genericData, confidence: 60 };
+            }
+
+            return { success: false, error: 'Geen receptgegevens gevonden op deze pagina' };
+        }
+
+        function extractFromJsonLd(doc) {
+            try {
+                const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+                
+                for (let script of scripts) {
+                    try {
+                        const data = JSON.parse(script.textContent);
+                        const recipes = Array.isArray(data) ? data : [data];
+                        
+                        for (let item of recipes) {
+                            if (item['@type'] === 'Recipe' || (item['@graph'] && item['@graph'].find(g => g['@type'] === 'Recipe'))) {
+                                const recipe = item['@type'] === 'Recipe' ? item : item['@graph'].find(g => g['@type'] === 'Recipe');
+                                
+                                const ingredients = recipe.recipeIngredient ? 
+                                    (Array.isArray(recipe.recipeIngredient) ? recipe.recipeIngredient.join('\n') : recipe.recipeIngredient) : '';
+                                
+                                const instructions = recipe.recipeInstructions ? 
+                                    recipe.recipeInstructions.map(inst => inst.text || inst).join('\n') : '';
+
+                                return {
+                                    success: true,
+                                    title: recipe.name || '',
+                                    ingredients: ingredients,
+                                    instructions: instructions,
+                                    prepTime: recipe.prepTime || recipe.totalTime || '',
+                                    servings: recipe.recipeYield || recipe.yield || '',
+                                    tags: recipe.recipeCategory || recipe.recipeCuisine || ''
+                                };
+                            }
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            } catch (error) {
+                console.log('JSON-LD extraction failed:', error);
+            }
+            
+            return { success: false };
+        }
+
+        function extractFromAllerhande(doc) {
+            try {
+                const title = doc.querySelector('h1')?.textContent?.trim() || '';
+                
+                const ingredientElements = doc.querySelectorAll('.recipe-ingredients li, .ingredients li, [data-test-id="ingredient"]');
+                const ingredients = Array.from(ingredientElements).map(el => el.textContent.trim()).join('\n');
+                
+                const instructionElements = doc.querySelectorAll('.recipe-method li, .instructions li, .recipe-instructions li');
+                const instructions = Array.from(instructionElements).map(el => el.textContent.trim()).join('\n');
+                
+                const prepTime = doc.querySelector('[data-test-id="duration"], .prep-time, .cooking-time')?.textContent?.trim() || '';
+                const servings = doc.querySelector('[data-test-id="portions"], .servings, .yield')?.textContent?.trim() || '';
+
+                if (title && ingredients) {
+                    return {
+                        success: true,
+                        title,
+                        ingredients,
+                        instructions,
+                        prepTime,
+                        servings,
+                        tags: 'allerhande'
+                    };
+                }
+            } catch (error) {
+                console.log('Allerhande extraction failed:', error);
+            }
+            
+            return { success: false };
+        }
+
+        function extractFromSmulweb(doc) {
+            try {
+                const title = doc.querySelector('h1, .recipe-title')?.textContent?.trim() || '';
+                
+                const ingredientElements = doc.querySelectorAll('.ingredients li, .recipe-ingredients li');
+                const ingredients = Array.from(ingredientElements).map(el => el.textContent.trim()).join('\n');
+                
+                const instructionElements = doc.querySelectorAll('.directions li, .instructions li, .recipe-method li');
+                const instructions = Array.from(instructionElements).map(el => el.textContent.trim()).join('\n');
+
+                if (title && ingredients) {
+                    return {
+                        success: true,
+                        title,
+                        ingredients,
+                        instructions,
+                        prepTime: '',
+                        servings: '',
+                        tags: 'smulweb'
+                    };
+                }
+            } catch (error) {
+                console.log('Smulweb extraction failed:', error);
+            }
+            
+            return { success: false };
+        }
+
+        function extractFromGenericHtml(doc) {
+            try {
+                // Try to find title
+                const title = doc.querySelector('h1')?.textContent?.trim() || 
+                             doc.querySelector('.recipe-title, .entry-title')?.textContent?.trim() || '';
+                
+                // Try to find ingredients
+                const ingredientSelectors = [
+                    '.ingredients li',
+                    '.recipe-ingredients li', 
+                    'ul li:contains("gram")',
+                    'ul li:contains("ml")',
+                    'li[class*="ingredient"]'
+                ];
+                
+                let ingredients = '';
+                for (let selector of ingredientSelectors) {
+                    const elements = doc.querySelectorAll(selector);
+                    if (elements.length > 2) { // At least 3 ingredients
+                        ingredients = Array.from(elements).map(el => el.textContent.trim()).join('\n');
+                        break;
+                    }
+                }
+
+                if (title && ingredients) {
+                    return {
+                        success: true,
+                        title,
+                        ingredients,
+                        instructions: '',
+                        prepTime: '',
+                        servings: '',
+                        tags: 'generic'
+                    };
+                }
+            } catch (error) {
+                console.log('Generic extraction failed:', error);
+            }
+            
+            return { success: false };
+        }
         closeModal.addEventListener('click', closeModalFunc);
         cancelBtn.addEventListener('click', closeModalFunc);
 
