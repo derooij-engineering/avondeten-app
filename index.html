@@ -2,233 +2,248 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Avondeten Inspiratie — met Weekplanning</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Avondeten Inspiratie</title>
 
-  <!-- PWA basics (optioneel, laat staan als je al een manifest & SW hebt) -->
+  <!-- PWA meta -->
   <meta name="theme-color" content="#f97316" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Avondeten" />
-  <meta name="description" content="Ontdek, bewaar en plan jullie favoriete gerechten. Met weekplanning en boodschappenlijst." />
 
-  <!-- Firebase compat SDKs (blijven gelijk aan jouw project) -->
+  <!-- Firebase (compat v9) -->
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
       --brand: #f97316;
-      --brand-600: #ea580c;
-      --success: #10b981;
-      --success-600: #059669;
+      --brand-dark: #ea580c;
+      --ok: #10b981;
+      --ok-dark: #059669;
       --danger: #ef4444;
-      --danger-600: #dc2626;
       --muted: #6b7280;
-      --card: #ffffff;
-      --bg-grad-a: #fff7ed;
-      --bg-grad-b: #fed7d7;
+      --panel: #ffffff;
+      --soft: #f9fafb;
     }
     * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, var(--bg-grad-a) 0%, var(--bg-grad-b) 100%);
       margin: 0; padding: 16px; min-height: 100vh;
+      font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+      background: linear-gradient(135deg, #fff7ed 0%, #fed7d7 100%);
+      color: #111827;
     }
-    .container { max-width: 1200px; margin: 0 auto; }
-    .header { text-align: center; margin-bottom: 24px; }
-    .header h1 { margin: 0 0 6px; font-size: 2rem; color: #1f2937; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .header { text-align: center; margin: 0 0 20px; }
+    .header h1 { margin: 0 0 6px; font-size: 28px; }
     .header p { margin: 0; color: var(--muted); }
 
-    .grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
-    @media (min-width: 1024px) { .grid { grid-template-columns: 2fr 1fr; } }
+    .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    @media (min-width: 980px) {
+      .grid { grid-template-columns: 2fr 1fr; }
+    }
 
-    .card { background: var(--card); border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,.06); padding: 20px; }
-    .card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .card-title { margin: 0; font-weight: 700; font-size: 1.25rem; color: #111827; }
+    .card { background: var(--panel); border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
+    .card h2 { margin: 0; font-size: 18px; }
 
     .btn { border: 0; border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-primary { background: var(--brand); color:#fff; }
-    .btn-primary:hover { background: var(--brand-600); }
-    .btn-success { background: var(--success); color:#fff; }
-    .btn-success:hover { background: var(--success-600); }
-    .btn-danger { background: var(--danger); color:#fff; }
-    .btn-danger:hover { background: var(--danger-600); }
-    .btn-ghost { background: #eef2ff; color:#1e3a8a; }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-prim { background: var(--brand); color: #fff; }
+    .btn-prim:hover { background: var(--brand-dark); }
+    .btn-ok { background: var(--ok); color:#fff; }
+    .btn-ok:hover { background: var(--ok-dark); }
+    .btn-ghost { background: #e5e7eb; color:#111827; }
+    .btn-danger { background: var(--danger); color: #fff; }
+
+    /* ---------- Weekplanner header layout ---------- */
+    .planner-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center; gap: 8px; margin-bottom: 12px;
+    }
+    .week-title { text-align: center; font-weight: 600; }
+    .week-title .date { color: #374151; font-weight: 600; }
+    .week-title .icon { margin-right: 6px; }
+
+    .week-grid { display: grid; gap: 10px; grid-template-columns: repeat(7, 1fr); }
+    @media (max-width: 820px) { .week-grid { grid-template-columns: 1fr; } }
+
+    .day { background: #f8fafc; border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px; min-height: 96px; display: flex; flex-direction: column; gap: 8px; }
+    .day.today { border-color: var(--ok); background: #ecfdf5; }
+    .day .head { display: flex; justify-content: space-between; font-weight: 600; font-size: 13px; color: #111827; }
+    .day .date { font-size: 12px; color: var(--muted); }
+    .day .meal {
+      margin-top: 2px; flex:1; display:flex; align-items:center; justify-content:center;
+      border:1px dashed #d1d5db; border-radius:8px; background:#fff; color:#6b7280; font-size: 14px;
+      padding: 8px; text-align:center;
+    }
+    .day.has-meal .meal { border:1px solid #f59e0b; background:#fff7ed; color:#92400e; }
+
+    .recipe-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 720px) { .recipe-grid { grid-template-columns: repeat(2,1fr); } }
+    .recipe { border:1px solid #e5e7eb; border-radius:10px; padding: 12px; background:#fff; cursor:pointer; }
+    .recipe .top { display:flex; justify-content:space-between; gap:6px; }
+    .recipe .title { font-weight:700; }
+    .tags { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0; }
+    .tag { background:#fed7aa; color:#9a3412; font-size: 11px; padding: 2px 8px; border-radius:999px; }
+
+    .shopping { max-height: 420px; overflow:auto; }
+    .shop-row { display:flex; align-items:center; gap:10px; padding:8px; border-radius:8px; }
+    .shop-row:hover { background: #f9fafb; }
+    .shop-row.checked { color:#6b7280; text-decoration: line-through; }
+    .shop-actions { margin-left:auto; display:flex; gap:8px; }
+    .shop-edit { display:none; gap:6px; align-items:center; width:100%; }
+    .shop-edit input { flex:1; padding:8px; border:1px solid #d1d5db; border-radius:8px; }
 
     .muted { color: var(--muted); }
+    .empty { text-align:center; color: var(--muted); padding: 24px 8px; }
 
-    .recipe-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 768px) { .recipe-grid { grid-template-columns: repeat(2, 1fr); } }
+    /* Modal */
+    .modal { position:fixed; inset:0; background: rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; padding:16px; z-index:999; }
+    .modal-body { width:100%; max-width:620px; max-height:80vh; overflow:auto; background:#fff; border-radius:14px; padding:16px; }
+    .row { display:grid; gap:10px; grid-template-columns: 1fr 1fr; }
+    .row-1 { display:grid; gap:10px; grid-template-columns:1fr; }
+    .field label { font-size:12px; color:#374151; font-weight:600; display:block; margin-bottom:6px; }
+    .field input, .field textarea { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:10px; }
+    textarea { min-height:120px; resize:vertical; }
 
-    .recipe-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; transition: box-shadow .2s; cursor: pointer; background: #fff; }
-    .recipe-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,.08); }
-    .recipe-title { margin:0 0 6px; font-weight: 700; color:#111827; }
-    .recipe-meta { display:flex; gap:12px; font-size:.9rem; color: var(--muted); margin-bottom: 8px; }
-    .tags { display:flex; flex-wrap: wrap; gap:6px; margin: 8px 0; }
-    .tag { background:#fed7aa; color:#7c2d12; font-size:.75rem; padding: 3px 8px; border-radius: 999px; }
+    .toggle { display:flex; gap:8px; margin-bottom: 8px; }
+    .toggle .btn { flex:1; }
+    .info { font-size: 12px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; padding:8px; border-radius:8px; }
 
-    .empty { text-align:center; color:var(--muted); padding: 24px 8px; }
-
-    /* Weekplanner */
-    .week-bar { display:flex; align-items:center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-    .week-when { font-weight: 600; }
-    .week-grid { display:grid; grid-template-columns: repeat(7,1fr); gap: 10px; }
-    @media (max-width: 900px) { .week-grid { grid-template-columns: 1fr; } }
-
-    .day { background:#f8fafc; border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px; min-height: 110px; display:flex; flex-direction:column; gap:6px; cursor:pointer; }
-    .day.today { border-color: var(--success); background:#ecfdf5; }
-    .day-head { display:flex; align-items:center; justify-content:space-between; font-weight: 600; color:#111827; }
-    .day-date { font-size:.8rem; color: var(--muted); }
-    .day-meal { flex:1; display:flex; align-items:center; justify-content:center; text-align:center; font-size:.95rem; border:1px dashed #d1d5db; border-radius: 8px; color:#9ca3af; background:#fff; padding: 6px; }
-    .day-meal.filled { border-color:#f59e0b; color:#7c2d12; background:#fff7ed; position:relative; }
-    .day-remove { position:absolute; right: -6px; top:-6px; width: 22px; height:22px; border-radius: 50%; background: var(--danger); color:#fff; border:0; cursor:pointer; display:none; }
-    .day-meal.filled:hover .day-remove { display:block; }
-
-    /* Modal generic */
-    .modal { position: fixed; inset: 0; display:none; align-items: center; justify-content: center; background: rgba(0,0,0,.45); padding: 16px; z-index: 50; }
-    .modal.show { display: flex; }
-    .modal-card { background:#fff; width: 100%; max-width: 620px; border-radius: 12px; padding: 18px; max-height: 85vh; overflow:auto; }
-    .modal-head { display:flex; align-items:center; justify-content:space-between; gap: 8px; margin-bottom: 12px; }
-
-    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .field { margin: 10px 0; }
-    .label { display:block; font-weight:600; margin: 6px 0; color:#374151; }
-    .input, .textarea, .select { width:100%; border:1px solid #d1d5db; border-radius: 8px; padding: 10px; font-size: 1rem; }
-    .textarea { min-height: 120px; resize: vertical; }
-
-    /* Ingredients selection list in plan modal */
-    .ing-list { border:1px solid #e5e7eb; border-radius: 10px; padding: 10px; max-height: 260px; overflow: auto; background:#fff; }
-    .ing-item { display:flex; align-items:center; gap: 10px; padding: 6px; border-radius: 8px; }
-    .ing-item:hover { background:#f9fafb; }
-
-    /* Shopping list */
-    .shop-list { max-height: 460px; overflow:auto; }
-    .shop-row { display:flex; align-items:center; gap: 10px; padding: 8px; border-radius: 8px; }
-    .shop-row:hover { background:#f9fafb; }
-    .shop-row.checked { color: var(--muted); text-decoration: line-through; }
-    .icon-btn { background: transparent; border: 0; cursor:pointer; font-size: 1rem; }
-    .icon-btn.danger { color: var(--danger); }
-    .icon-btn.edit { color: #2563eb; }
-
-    .hint { font-size:.85rem; color:#1e40af; background:#dbeafe; border-radius: 10px; padding: 10px; }
+    .inline { display:flex; align-items:center; gap:8px; }
+    .between { display:flex; justify-content:space-between; gap:10px; align-items:center; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>🍽️ Avondeten Inspiratie</h1>
-      <p>Weekplanning + boodschappenlijst (gedeeld via Firebase)</p>
+      <p class="muted">Ontdek, bewaar en plan jullie favoriete gerechten</p>
     </div>
 
     <div class="grid">
-      <!-- Weekplanning -->
-      <section class="card" style="grid-column: 1 / -1;">
-        <div class="card-header">
-          <h2 class="card-title">📅 Weekplanning</h2>
-          <div style="display:flex; gap:8px; align-items:center;">
-            <button class="btn btn-ghost" id="prevWeekBtn">← Vorige week</button>
-            <div class="week-when" id="weekLabel">Week</div>
-            <button class="btn btn-ghost" id="nextWeekBtn">Volgende week →</button>
-          </div>
+      <!-- Weekplanner -->
+      <section class="card" style="grid-column: 1 / -1">
+        <div class="planner-header">
+          <button id="prevWeekBtn" class="btn btn-ghost">← Vorige week</button>
+          <div class="week-title"><span class="icon">📅</span><span id="weekRange" class="date"></span></div>
+          <button id="nextWeekBtn" class="btn btn-ghost">Volgende week →</button>
         </div>
         <div id="weekGrid" class="week-grid"></div>
       </section>
 
       <!-- Recepten -->
       <section class="card">
-        <div class="card-header">
-          <h2 class="card-title">Recepten Collectie</h2>
-          <button class="btn btn-primary" id="addRecipeBtn">➕ Recept</button>
+        <div class="between" style="margin-bottom:10px">
+          <h2>Recepten Collectie</h2>
+          <button id="addRecipeBtn" class="btn btn-prim">➕ Recept</button>
         </div>
         <div id="recipeGrid" class="recipe-grid"></div>
-        <div id="recipeEmpty" class="empty" style="display:none;">Nog geen recepten. Voeg er eentje toe!</div>
+        <div id="recipesEmpty" class="empty">🍳 Nog geen recepten. Klik op “Recept” om te beginnen.</div>
       </section>
 
       <!-- Boodschappenlijst -->
       <section class="card">
-        <div class="card-header">
-          <h2 class="card-title">Boodschappenlijst</h2>
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-primary" id="copyListBtn" title="Kopieer naar klembord">📋</button>
-            <button class="btn btn-danger" id="clearListBtn" title="Alles wissen">🗑️</button>
+        <div class="between" style="margin-bottom:10px">
+          <h2>Boodschappenlijst</h2>
+          <div class="inline">
+            <button id="copyListBtn" class="btn btn-prim" title="Kopieer ongevinkte items">📋</button>
+            <button id="clearListBtn" class="btn btn-danger" title="Wis lijst">🗑️</button>
           </div>
         </div>
-        <div id="shoppingEmpty" class="empty" style="display:none;">Leeg. Voeg ingrediënten toe vanuit een recept.</div>
-        <div id="shoppingList" class="shop-list"></div>
-        <div id="shoppingHint" class="hint" style="margin-top:10px; display:none;">💡 Tip: Kopieer (📋) en plak in iPhone Herinneringen.</div>
+        <div id="shoppingList" class="shopping"></div>
+        <div id="shoppingEmpty" class="empty">🛒 Nog leeg. Voeg ingrediënten toe vanuit je recepten of weekplanning.</div>
       </section>
     </div>
   </div>
 
-  <!-- Recept toevoegen/bewerken -->
-  <div class="modal" id="recipeModal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 id="recipeModalTitle" style="margin:0;">Nieuw recept</h3>
-        <button class="icon-btn" id="recipeModalClose" aria-label="Sluiten">✖️</button>
+  <!-- Recept modal -->
+  <div id="recipeModal" class="modal" style="display:none">
+    <div class="modal-body">
+      <div class="between" style="margin-bottom:6px">
+        <h3 id="recipeModalTitle" style="margin:0">Nieuw recept</h3>
+        <button id="recipeClose" class="btn btn-ghost">✖</button>
       </div>
-      <div class="field">
-        <label class="label">Titel *</label>
-        <input id="f_title" class="input" placeholder="Bijv. Pasta pesto" />
+
+      <div class="toggle">
+        <button id="manualBtn" class="btn btn-prim">✏️ Handmatig</button>
+        <button id="urlBtn" class="btn btn-ghost">🔗 Van URL</button>
       </div>
+
+      <div id="urlSection" style="display:none; margin-bottom:10px">
+        <div class="field">
+          <label>Website URL *</label>
+          <div class="inline" style="gap:8px">
+            <input id="recipeUrl" type="url" placeholder="https://www.ah.nl/allerhande/recept/..." />
+            <button id="extractBtn" class="btn btn-ok">🔍 Ophalen</button>
+          </div>
+          <div id="extractStatus" class="muted" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div id="portionBox" class="info" style="display:none; margin:8px 0">
+        🍽️ <strong>Aanpassen voor</strong>
+        <span class="inline">
+          <input id="newPortions" type="number" min="1" max="20" value="3" style="width:70px" />
+          <span>personen</span>
+          <button id="adjustBtn" class="btn btn-ghost">🔄 Aanpassen</button>
+        </span>
+        <div id="portionNote" class="muted" style="margin-top:6px">Tip: past hoeveelheden in de ingrediënten automatisch aan (uitgaand van 4p basis).</div>
+      </div>
+
+      <div class="field"><label>Titel *</label><input id="title" type="text" placeholder="Pasta carbonara" /></div>
       <div class="row">
-        <div class="field">
-          <label class="label">Bereidingstijd</label>
-          <input id="f_prep" class="input" placeholder="30 min" />
-        </div>
-        <div class="field">
-          <label class="label">Porties</label>
-          <input id="f_servings" class="input" placeholder="4 personen" />
-        </div>
+        <div class="field"><label>Bereidingstijd</label><input id="prepTime" type="text" placeholder="30 min" /></div>
+        <div class="field"><label>Porties</label><input id="servings" type="text" placeholder="4 personen" /></div>
       </div>
-      <div class="field">
-        <label class="label">Tags (komma-gescheiden)</label>
-        <input id="f_tags" class="input" placeholder="pasta, snel, italiaans" />
-      </div>
-      <div class="field">
-        <label class="label">Ingrediënten * (één per regel)</label>
-        <textarea id="f_ings" class="textarea" placeholder="200 g spaghetti\n100 g pesto\n250 g kip"></textarea>
-      </div>
-      <div class="field">
-        <label class="label">Bereidingswijze</label>
-        <textarea id="f_instr" class="textarea" placeholder="Kook de pasta…"></textarea>
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top: 10px;">
-        <button class="btn" id="recipeCancel">Annuleren</button>
-        <button class="btn btn-success" id="recipeSave">Opslaan</button>
+      <div class="field"><label>Tags (komma)</label><input id="tags" type="text" placeholder="pasta, snel, italiaans" /></div>
+      <div class="field"><label>Ingrediënten * (één per regel)</label><textarea id="ingredients" placeholder="200 g spaghetti\n100 g spek\n2 eieren"></textarea></div>
+      <div class="field"><label>Bereidingswijze</label><textarea id="instructions" placeholder="Kook de pasta..."></textarea></div>
+
+      <div class="between" style="margin-top:8px">
+        <button id="recipeCancel" class="btn btn-ghost">Annuleren</button>
+        <button id="recipeSave" class="btn btn-ok">Opslaan</button>
       </div>
     </div>
   </div>
 
-  <!-- Dag plannen: recept kiezen + ingrediënten selecteren -->
-  <div class="modal" id="planModal" aria-hidden="true">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 id="planModalTitle" style="margin:0;">Plan gerecht</h3>
-        <button class="icon-btn" id="planModalClose" aria-label="Sluiten">✖️</button>
+  <!-- Dag / ingrediënten select modal -->
+  <div id="dayModal" class="modal" style="display:none">
+    <div class="modal-body">
+      <div class="between" style="margin-bottom:6px">
+        <h3 id="dayTitle" style="margin:0">Dag</h3>
+        <button id="dayClose" class="btn btn-ghost">✖</button>
       </div>
-      <div class="field">
-        <label class="label">Recept</label>
-        <select id="planSelect" class="select"></select>
+
+      <div id="daySelectWrap" class="field">
+        <label>Kies recept</label>
+        <select id="dayRecipeSelect"></select>
       </div>
-      <div id="planIngsWrap" style="display:none;">
-        <div class="label">Ingrediënten (vink aan wat naar de boodschappenlijst moet)</div>
-        <div id="planIngs" class="ing-list"></div>
-        <div style="display:flex; gap:8px; margin-top:10px;">
-          <button class="btn btn-success" id="addSelectedBtn">+ Geselecteerde naar lijst</button>
-          <button class="btn" id="addAllBtn">+ Alle naar lijst</button>
+
+      <div id="dayIngredientsWrap" style="display:none">
+        <div class="between" style="margin: 6px 0 10px">
+          <strong>Ingrediënten</strong>
+          <div class="inline">
+            <button id="addSelectedBtn" class="btn btn-ok">+ Geselecteerde naar lijst</button>
+            <button id="addAllBtn" class="btn btn-prim">+ Alle naar lijst</button>
+          </div>
         </div>
+        <div id="dayIngredients"></div>
       </div>
-      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top: 14px;">
-        <button class="btn" id="planCancel">Annuleren</button>
-        <button class="btn btn-primary" id="planSave">Dag opslaan</button>
+
+      <div class="between" style="margin-top:10px">
+        <button id="dayRemoveBtn" class="btn btn-danger" style="display:none">Verwijder uit dag</button>
+        <div class="inline">
+          <button id="dayCancel" class="btn btn-ghost">Sluiten</button>
+          <button id="daySave" class="btn btn-ok">Opslaan</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ===== Firebase setup (laat jouw bestaande config hier staan) =====
+    /* ============================== Firebase ============================== */
     const firebaseConfig = {
       apiKey: "AIzaSyDwCytKLyfCWkaRvDoVVu_hUrTpuK3ef4Y",
       authDomain: "avondeten-inspiratie.firebaseapp.com",
@@ -238,399 +253,502 @@
       appId: "1:530227974284:web:e101bcc416b51e0a58aba9",
       measurementId: "G-7JS0X2R3DB"
     };
-    try { firebase.initializeApp(firebaseConfig); } catch (e) { /* noop if already init */ }
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ===== App State =====
-    let recipes = [];                 // [{id, title, prepTime, servings, tags[], ingredients[], instructions, dateAdded}]
-    let shoppingList = [];            // [{id, text, checked, editing?}]
-    const weekPlans = {};             // { [weekKey]: { days: {0: {id,title}, ...}} }
+    /* ============================== State ============================== */
+    let recipes = [];            // [{ id,title,prepTime,servings,tags[],ingredients[],instructions,dateAdded }]
+    let shoppingList = [];       // [{ id, text, checked }]
+    let weekPlan = {};           // { [weekKey-dayIndex]: { id, title } }
 
-    // Editing state
     let editingRecipeId = null;
 
-    // ===== DOM =====
+    /* ============================== DOM ============================== */
     const recipeGrid = document.getElementById('recipeGrid');
-    const recipeEmpty = document.getElementById('recipeEmpty');
+    const recipesEmpty = document.getElementById('recipesEmpty');
     const addRecipeBtn = document.getElementById('addRecipeBtn');
 
     const shoppingListEl = document.getElementById('shoppingList');
     const shoppingEmpty = document.getElementById('shoppingEmpty');
-    const shoppingHint = document.getElementById('shoppingHint');
     const copyListBtn = document.getElementById('copyListBtn');
     const clearListBtn = document.getElementById('clearListBtn');
 
     const weekGrid = document.getElementById('weekGrid');
-    const weekLabel = document.getElementById('weekLabel');
+    const weekRangeEl = document.getElementById('weekRange');
     const prevWeekBtn = document.getElementById('prevWeekBtn');
     const nextWeekBtn = document.getElementById('nextWeekBtn');
 
-    // Recipe modal
+    // Recipe modal elements
     const recipeModal = document.getElementById('recipeModal');
     const recipeModalTitle = document.getElementById('recipeModalTitle');
-    const recipeModalClose = document.getElementById('recipeModalClose');
-    const f_title = document.getElementById('f_title');
-    const f_prep = document.getElementById('f_prep');
-    const f_servings = document.getElementById('f_servings');
-    const f_tags = document.getElementById('f_tags');
-    const f_ings = document.getElementById('f_ings');
-    const f_instr = document.getElementById('f_instr');
+    const recipeClose = document.getElementById('recipeClose');
     const recipeCancel = document.getElementById('recipeCancel');
     const recipeSave = document.getElementById('recipeSave');
+    const manualBtn = document.getElementById('manualBtn');
+    const urlBtn = document.getElementById('urlBtn');
+    const urlSection = document.getElementById('urlSection');
+    const extractBtn = document.getElementById('extractBtn');
+    const extractStatus = document.getElementById('extractStatus');
+    const portionBox = document.getElementById('portionBox');
+    const newPortions = document.getElementById('newPortions');
+    const adjustBtn = document.getElementById('adjustBtn');
+    const portionNote = document.getElementById('portionNote');
 
-    // Plan modal
-    const planModal = document.getElementById('planModal');
-    const planModalClose = document.getElementById('planModalClose');
-    const planModalTitle = document.getElementById('planModalTitle');
-    const planSelect = document.getElementById('planSelect');
-    const planIngsWrap = document.getElementById('planIngsWrap');
-    const planIngs = document.getElementById('planIngs');
+    const titleEl = document.getElementById('title');
+    const prepTimeEl = document.getElementById('prepTime');
+    const servingsEl = document.getElementById('servings');
+    const tagsEl = document.getElementById('tags');
+    const ingredientsEl = document.getElementById('ingredients');
+    const instructionsEl = document.getElementById('instructions');
+    const recipeUrlEl = document.getElementById('recipeUrl');
+
+    // Day modal elements
+    const dayModal = document.getElementById('dayModal');
+    const dayTitle = document.getElementById('dayTitle');
+    const dayClose = document.getElementById('dayClose');
+    const dayCancel = document.getElementById('dayCancel');
+    const daySave = document.getElementById('daySave');
+    const dayRemoveBtn = document.getElementById('dayRemoveBtn');
+    const daySelectWrap = document.getElementById('daySelectWrap');
+    const dayRecipeSelect = document.getElementById('dayRecipeSelect');
+    const dayIngredientsWrap = document.getElementById('dayIngredientsWrap');
+    const dayIngredientsEl = document.getElementById('dayIngredients');
     const addSelectedBtn = document.getElementById('addSelectedBtn');
     const addAllBtn = document.getElementById('addAllBtn');
-    const planCancel = document.getElementById('planCancel');
-    const planSave = document.getElementById('planSave');
 
-    // ===== Utils =====
-    function toISODate(d) { return d.toISOString().slice(0,10); }
-    function mondayOf(d) {
-      const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const day = x.getDay() || 7; // 1..7 (Mon..Sun)
-      if (day !== 1) x.setDate(x.getDate() - (day - 1));
-      x.setHours(0,0,0,0);
-      return x;
+    /* ============================== Helpers ============================== */
+    const days = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
+
+    function getMonday(d){
+      const x = new Date(d); const day = (x.getDay()+6)%7; // 0=ma
+      x.setHours(0,0,0,0); x.setDate(x.getDate()-day); return x;
     }
-    function weekKeyOf(d) { return toISODate(mondayOf(d)); }
-    function formatDM(d) { return `${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}`; }
-    function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+    function clone(d){ return new Date(d.getTime()); }
+    function addDays(d,n){ const x=clone(d); x.setDate(x.getDate()+n); return x; }
+    function fmtShort(d){ return d.toLocaleDateString('nl-NL',{ day:'2-digit', month:'2-digit' }); }
+    function weekKeyOf(d){ return `week-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; }
 
-    let currentWeekStart = mondayOf(new Date());
+    // we laten max 2 weken bestaan: current (offset 0) en previous (offset -1)
+    let weekOffset = 0; // 0 = huidige week, -1 = vorige
+    function currentWeekStart(){ return addDays( getMonday(new Date()), 7*weekOffset ); }
 
-    // ===== Storage (Firestore + localStorage fallback) =====
-    async function saveAll() {
-      try {
-        await db.collection('recipes').doc('shared').set({ recipes, lastUpdated: new Date() });
-        await db.collection('shopping').doc('shared').set({ items: shoppingList, lastUpdated: new Date() });
-
-        // keep only current and previous week in the shared doc
-        const wk = weekKeyOf(currentWeekStart);
-        const prev = weekKeyOf(new Date(currentWeekStart.getTime() - 7*24*3600*1000));
-        const plansToKeep = {};
-        if (weekPlans[wk]) plansToKeep[wk] = weekPlans[wk];
-        if (weekPlans[prev]) plansToKeep[prev] = weekPlans[prev];
-        await db.collection('weekplan').doc('shared').set({ plans: plansToKeep, lastUpdated: new Date() });
-
-        // mirror to localStorage
-        localStorage.setItem('recipes', JSON.stringify(recipes));
-        localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
-        localStorage.setItem('weekPlans', JSON.stringify(plansToKeep));
-      } catch (e) {
-        // Fallback to localStorage only
-        localStorage.setItem('recipes', JSON.stringify(recipes));
-        localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
-        const wk = weekKeyOf(currentWeekStart);
-        const prev = weekKeyOf(new Date(currentWeekStart.getTime() - 7*24*3600*1000));
-        const plansToKeep = {};
-        if (weekPlans[wk]) plansToKeep[wk] = weekPlans[wk];
-        if (weekPlans[prev]) plansToKeep[prev] = weekPlans[prev];
-        localStorage.setItem('weekPlans', JSON.stringify(plansToKeep));
-      }
-    }
-
-    async function loadAll() {
-      try {
-        const [rSnap, sSnap, wSnap] = await Promise.all([
-          db.collection('recipes').doc('shared').get(),
-          db.collection('shopping').doc('shared').get(),
-          db.collection('weekplan').doc('shared').get(),
-        ]);
-        if (rSnap.exists) recipes = rSnap.data().recipes || []; else recipes = JSON.parse(localStorage.getItem('recipes')||'[]');
-        if (sSnap.exists) shoppingList = sSnap.data().items || []; else shoppingList = JSON.parse(localStorage.getItem('shoppingList')||'[]');
-        if (wSnap.exists) Object.assign(weekPlans, wSnap.data().plans || {}); else Object.assign(weekPlans, JSON.parse(localStorage.getItem('weekPlans')||'{}'));
-      } catch (e) {
-        recipes = JSON.parse(localStorage.getItem('recipes')||'[]');
-        shoppingList = JSON.parse(localStorage.getItem('shoppingList')||'[]');
-        Object.assign(weekPlans, JSON.parse(localStorage.getItem('weekPlans')||'{}'));
-      }
-    }
-
-    // ===== Weekplanner UI =====
-    function updateWeekHeader() {
-      const start = new Date(currentWeekStart);
-      const end = new Date(currentWeekStart); end.setDate(end.getDate()+6);
-      weekLabel.textContent = `Week van ${formatDM(start)} t/m ${formatDM(end)}`;
-
-      // limit navigation: max 1 week terug, en niet verder dan huidige week vooruit
-      const todayMon = mondayOf(new Date());
-      const prevAllowed = mondayOf(new Date(todayMon.getTime() - 7*24*3600*1000));
-      prevWeekBtn.disabled = currentWeekStart.getTime() <= prevAllowed.getTime() ? true : false;
-      nextWeekBtn.disabled = currentWeekStart.getTime() >= todayMon.getTime();
-    }
-
-    function ensureWeekObj(weekKey){ if (!weekPlans[weekKey]) weekPlans[weekKey] = { days: {} }; }
-
-    function renderWeek() {
-      updateWeekHeader();
-      const weekKey = weekKeyOf(currentWeekStart);
-      ensureWeekObj(weekKey);
-
-      const days = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
-      const todayStr = new Date().toDateString();
-
-      weekGrid.innerHTML = '';
-      for (let i=0;i<7;i++){
-        const date = new Date(currentWeekStart); date.setDate(date.getDate()+i);
-        const isToday = date.toDateString() === todayStr;
-        const chosen = weekPlans[weekKey].days[i]; // {id,title}
-        const day = document.createElement('div');
-        day.className = 'day' + (isToday ? ' today' : '');
-        day.setAttribute('data-day', i);
-        day.innerHTML = `
-          <div class="day-head">
-            <div>${days[i]}</div>
-            <div class="day-date">${formatDM(date)}</div>
-          </div>
-          <div class="day-meal ${chosen ? 'filled' : ''}">
-            ${chosen ? `${chosen.title}` : 'Klik om een gerecht te kiezen'}
-            ${chosen ? '<button class="day-remove" title="Verwijderen">×</button>' : ''}
-          </div>
-        `;
-        // Click handlers
-        day.addEventListener('click', (ev) => {
-          if (ev.target && ev.target.classList.contains('day-remove')){
-            ev.stopPropagation();
-            delete weekPlans[weekKey].days[i];
-            saveAll();
-            renderWeek();
-          } else {
-            openPlanModal(weekKey, i, date, chosen?.id || null);
-          }
-        });
-        weekGrid.appendChild(day);
-      }
-    }
-
-    prevWeekBtn.addEventListener('click', () => { currentWeekStart.setDate(currentWeekStart.getDate()-7); renderWeek(); });
-    nextWeekBtn.addEventListener('click', () => { currentWeekStart.setDate(currentWeekStart.getDate()+7); renderWeek(); });
-
-    // ===== Recepten =====
-    function renderRecipes(){
-      if (!recipes.length){ recipeGrid.innerHTML=''; recipeEmpty.style.display='block'; return; }
-      recipeEmpty.style.display='none';
-      recipeGrid.innerHTML = recipes.map(r => `
-        <div class="recipe-card" onclick="viewRecipe(${r.id})">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-            <h3 class="recipe-title">${escapeHtml(r.title)}</h3>
-            <span>
-              <button class="icon-btn edit" title="Bewerken" onclick="event.stopPropagation(); editRecipe(${r.id})">✏️</button>
-              <button class="icon-btn danger" title="Verwijderen" onclick="event.stopPropagation(); deleteRecipe(${r.id})">🗑️</button>
-            </span>
-          </div>
-          <div class="recipe-meta">
-            ${r.prepTime ? `⏱️ ${escapeHtml(r.prepTime)}` : ''}
-            ${r.servings ? `• 👥 ${escapeHtml(r.servings)}` : ''}
-          </div>
-          ${r.tags?.length ? `<div class="tags">${r.tags.map(t=>`<span class='tag'>${escapeHtml(t)}</span>`).join('')}</div>` : ''}
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-            <small class="muted">Toegevoegd: ${escapeHtml(r.dateAdded||'')}</small>
-            <button class="btn btn-ghost" onclick="event.stopPropagation(); addRecipeToShopping(${r.id})">+ Boodschappen</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function openRecipeModal(editId=null){
-      editingRecipeId = editId;
-      if (editId){
-        const r = recipes.find(x=>x.id===editId); if (!r) return;
-        recipeModalTitle.textContent = 'Recept bewerken';
-        f_title.value = r.title || '';
-        f_prep.value = r.prepTime || '';
-        f_servings.value = r.servings || '';
-        f_tags.value = (r.tags||[]).join(', ');
-        f_ings.value = (r.ingredients||[]).join('\n');
-        f_instr.value = r.instructions || '';
-      } else {
-        recipeModalTitle.textContent = 'Nieuw recept';
-        f_title.value = f_prep.value = f_servings.value = f_tags.value = f_instr.value = '';
-        f_ings.value = '';
-      }
-      recipeModal.classList.add('show');
-    }
-    function closeRecipeModal(){ recipeModal.classList.remove('show'); }
-
-    addRecipeBtn.addEventListener('click', ()=> openRecipeModal(null));
-    recipeModalClose.addEventListener('click', closeRecipeModal);
-    recipeCancel.addEventListener('click', closeRecipeModal);
-
-    recipeSave.addEventListener('click', async () => {
-      const title = f_title.value.trim();
-      const ings = f_ings.value.trim();
-      if (!title || !ings){ alert('Vul minimaal titel en ingrediënten in.'); return; }
-      const r = {
-        id: editingRecipeId || Date.now(),
-        title,
-        prepTime: f_prep.value.trim(),
-        servings: f_servings.value.trim(),
-        tags: f_tags.value.split(',').map(s=>s.trim()).filter(Boolean),
-        ingredients: ings.split('\n').map(s=>s.trim()).filter(Boolean),
-        instructions: f_instr.value.trim(),
-        dateAdded: editingRecipeId ? (recipes.find(x=>x.id===editingRecipeId)?.dateAdded || new Date().toLocaleDateString('nl-NL')) : new Date().toLocaleDateString('nl-NL')
-      };
-      if (editingRecipeId){
-        const i = recipes.findIndex(x=>x.id===editingRecipeId);
-        if (i>=0) recipes[i]=r;
-      } else {
-        recipes.unshift(r);
-      }
-      await saveAll();
-      renderRecipes();
-      closeRecipeModal();
-    });
-
-    function editRecipe(id){ openRecipeModal(id); }
-    function deleteRecipe(id){ if (confirm('Verwijderen?')){ recipes = recipes.filter(x=>x.id!==id); saveAll(); renderRecipes(); } }
-    function viewRecipe(id){
-      const r = recipes.find(x=>x.id===id); if (!r) return;
-      alert(`${r.title}\n\nIngrediënten:\n${(r.ingredients||[]).join('\n')}\n\nBereiding:\n${r.instructions||'—'}`);
-    }
-
-    function addRecipeToShopping(id){
-      const r = recipes.find(x=>x.id===id); if (!r) return;
-      const toAdd = (r.ingredients||[]).map(t=>({ id: Date.now()+Math.random(), text: `${t} (${r.title})`, checked:false }));
-      shoppingList.push(...toAdd);
-      saveAll();
-      renderShopping();
-    }
-
-    // ===== Dag plannen modal =====
-    let planContext = { weekKey: null, dayIndex: null };
-    function openPlanModal(weekKey, dayIndex, dateObj, selectedRecipeId){
-      planContext = { weekKey, dayIndex };
-      planModalTitle.textContent = `Gerecht voor ${dateObj.toLocaleDateString('nl-NL', { weekday:'long', day:'2-digit', month:'2-digit' })}`;
-
-      // build select
-      planSelect.innerHTML = `<option value="">— kies recept —</option>` + recipes.map(r=>`<option value="${r.id}" ${selectedRecipeId===r.id? 'selected':''}>${escapeHtml(r.title)}</option>`).join('');
-      planIngsWrap.style.display = 'none';
-      planIngs.innerHTML = '';
-
-      planModal.classList.add('show');
-    }
-    function closePlanModal(){ planModal.classList.remove('show'); }
-
-    planModalClose.addEventListener('click', closePlanModal);
-    planCancel.addEventListener('click', closePlanModal);
-
-    planSelect.addEventListener('change', () => {
-      const rid = parseInt(planSelect.value);
-      if (!rid){ planIngsWrap.style.display='none'; planIngs.innerHTML=''; return; }
-      const r = recipes.find(x=>x.id===rid); if (!r){ planIngsWrap.style.display='none'; return; }
-      planIngsWrap.style.display = 'block';
-      planIngs.innerHTML = (r.ingredients||[]).map((t,i)=>`
-        <label class="ing-item">
-          <input type="checkbox" data-idx="${i}" checked />
-          <span>${escapeHtml(t)}</span>
-        </label>
-      `).join('');
-    });
-
-    addSelectedBtn.addEventListener('click', () => {
-      const rid = parseInt(planSelect.value); if (!rid) return;
-      const r = recipes.find(x=>x.id===rid); if (!r) return;
-      const checks = planIngs.querySelectorAll('input[type="checkbox"]');
-      const toAdd = [];
-      checks.forEach((cb, i) => {
-        if (cb.checked){ const t = r.ingredients[i]; toAdd.push({ id: Date.now()+Math.random(), text: `${t} (${r.title})`, checked:false }); }
+    function pruneWeekPlan(){
+      const cur = weekKeyOf(getMonday(new Date()));
+      const prevStart = addDays(getMonday(new Date()), -7);
+      const prev = weekKeyOf(prevStart);
+      const keep = new Set([cur, prev]);
+      const nextPlan = {};
+      Object.keys(weekPlan).forEach(k => {
+        const wk = k.split('-').slice(0,4).join('-'); // week-YYYY-M-D
+        if(keep.has(wk)) nextPlan[k] = weekPlan[k];
       });
-      if (toAdd.length){ shoppingList.push(...toAdd); saveAll(); renderShopping(); }
+      weekPlan = nextPlan;
+    }
+
+    function saveRecipes(){
+      return db.collection('recipes').doc('shared').set({ recipes, lastUpdated: new Date() })
+        .catch(()=> localStorage.setItem('recipes', JSON.stringify(recipes)) );
+    }
+    function saveShopping(){
+      return db.collection('shopping').doc('shared').set({ items: shoppingList, lastUpdated: new Date() })
+        .catch(()=> localStorage.setItem('shoppingList', JSON.stringify(shoppingList)) );
+    }
+    function saveWeek(){ pruneWeekPlan();
+      return db.collection('weekplan').doc('shared').set({ plan: weekPlan, lastUpdated: new Date() })
+        .catch(()=> localStorage.setItem('weekPlan', JSON.stringify(weekPlan)) );
+    }
+
+    async function loadAll(){
+      try {
+        const r = await db.collection('recipes').doc('shared').get();
+        recipes = r.exists ? (r.data().recipes||[]) : [];
+      } catch {
+        recipes = JSON.parse(localStorage.getItem('recipes')||'[]');
+      }
+      try {
+        const s = await db.collection('shopping').doc('shared').get();
+        shoppingList = s.exists ? (s.data().items||[]) : [];
+      } catch {
+        shoppingList = JSON.parse(localStorage.getItem('shoppingList')||'[]');
+      }
+      try {
+        const w = await db.collection('weekplan').doc('shared').get();
+        weekPlan = w.exists ? (w.data().plan||{}) : {};
+      } catch {
+        weekPlan = JSON.parse(localStorage.getItem('weekPlan')||'{}');
+      }
+      renderAll();
+    }
+
+    /* ============================== Weekplanner ============================== */
+    function renderWeekNav(){
+      const start = currentWeekStart();
+      const end = addDays(start, 6);
+      weekRangeEl.textContent = `${fmtShort(start)} – ${fmtShort(end)}`;
+      // beperk navigatie: alleen 0 en -1 toegelaten
+      prevWeekBtn.style.visibility = (weekOffset <= -1) ? 'hidden' : 'visible';
+      nextWeekBtn.style.visibility = (weekOffset >= 0) ? 'hidden' : 'visible';
+    }
+
+    function renderWeek(){
+      renderWeekNav();
+      weekGrid.innerHTML = '';
+      const start = currentWeekStart();
+      const todayStr = new Date().toDateString();
+      const keyBase = weekKeyOf(start);
+      for(let i=0;i<7;i++){
+        const d = addDays(start, i);
+        const isToday = (weekOffset===0 && d.toDateString()===todayStr);
+        const dayKey = `${keyBase}-${i}`;
+        const planned = weekPlan[dayKey];
+
+        const div = document.createElement('div');
+        div.className = `day ${isToday? 'today':''} ${planned? 'has-meal':''}`;
+        div.innerHTML = `
+          <div class="head"><span>${days[i]}</span><span class="date">${fmtShort(d)}</span></div>
+          <div class="meal">${planned ? planned.title : 'Klik om gerecht te kiezen'}</div>
+        `;
+        div.addEventListener('click', ()=> openDayModal(dayKey, d, planned));
+        weekGrid.appendChild(div);
+      }
+    }
+
+    prevWeekBtn.addEventListener('click', ()=>{ if(weekOffset>-1){ weekOffset--; renderWeek(); } });
+    nextWeekBtn.addEventListener('click', ()=>{ if(weekOffset<0){ weekOffset++; renderWeek(); } });
+
+    // Day modal
+    let currentDayKey = null;
+    function openDayModal(dayKey, date, planned){
+      currentDayKey = dayKey;
+      dayTitle.textContent = `${days[(date.getDay()+6)%7]} • ${fmtShort(date)}`;
+      dayRecipeSelect.innerHTML = `<option value="">Kies een recept…</option>` +
+        recipes.map(r=>`<option value="${r.id}">${escapeHtml(r.title)}</option>`).join('');
+      daySelectWrap.style.display = 'block';
+      dayIngredientsWrap.style.display = 'none';
+      dayRemoveBtn.style.display = planned ? 'inline-flex' : 'none';
+      if(planned){ dayRecipeSelect.value = planned.id; showDayIngredients(planned.id); }
+      dayModal.style.display='flex';
+    }
+
+    function closeDayModal(){ dayModal.style.display='none'; currentDayKey=null; dayIngredientsEl.innerHTML=''; }
+    dayClose.addEventListener('click', closeDayModal); dayCancel.addEventListener('click', closeDayModal);
+
+    dayRecipeSelect.addEventListener('change', () => {
+      const id = parseInt(dayRecipeSelect.value); if(!id) { dayIngredientsWrap.style.display='none'; return; }
+      showDayIngredients(id);
     });
 
-    addAllBtn.addEventListener('click', () => {
-      const rid = parseInt(planSelect.value); if (!rid) return;
-      const r = recipes.find(x=>x.id===rid); if (!r) return;
-      const toAdd = (r.ingredients||[]).map(t=>({ id: Date.now()+Math.random(), text: `${t} (${r.title})`, checked:false }));
-      shoppingList.push(...toAdd); saveAll(); renderShopping();
-    });
-
-    planSave.addEventListener('click', async () => {
-      const rid = parseInt(planSelect.value);
-      if (!rid){ alert('Kies eerst een recept.'); return; }
-      const r = recipes.find(x=>x.id===rid); if (!r) return;
-      ensureWeekObj(planContext.weekKey);
-      weekPlans[planContext.weekKey].days[planContext.dayIndex] = { id: r.id, title: r.title };
-      await saveAll();
-      renderWeek();
-      closePlanModal();
-    });
-
-    // ===== Boodschappenlijst =====
-    function renderShopping(){
-      if (!shoppingList.length){ shoppingListEl.innerHTML=''; shoppingEmpty.style.display='block'; shoppingHint.style.display='none'; return; }
-      shoppingEmpty.style.display='none'; shoppingHint.style.display='block';
-      shoppingListEl.innerHTML = shoppingList.map(it => {
-        if (it.editing){
-          return `
-            <div class="shop-row" data-id="${it.id}">
-              <input type="checkbox" ${it.checked?'checked':''} onclick="toggleItem(${it.id}); event.stopPropagation();" />
-              <input class="input" id="edit_${it.id}" value="${escapeAttr(it.text)}" style="flex:1;" />
-              <button class="btn btn-success" onclick="saveEdit(${it.id})">Opslaan</button>
-              <button class="btn" onclick="cancelEdit(${it.id})">Annuleren</button>
-            </div>`;
-        } else {
-          return `
-            <div class="shop-row ${it.checked?'checked':''}" data-id="${it.id}">
-              <input type="checkbox" ${it.checked?'checked':''} onclick="toggleItem(${it.id}); event.stopPropagation();" />
-              <span style="flex:1;">${escapeHtml(it.text)}</span>
-              <button class="icon-btn edit" title="Wijzigen" onclick="startEdit(${it.id})">✏️</button>
-              <button class="icon-btn danger" title="Verwijderen" onclick="deleteItem(${it.id})">🗑️</button>
-            </div>`;
-        }
+    function showDayIngredients(recipeId){
+      const r = recipes.find(x=>x.id===parseInt(recipeId)); if(!r){ dayIngredientsWrap.style.display='none'; return; }
+      dayIngredientsWrap.style.display = 'block';
+      dayIngredientsEl.innerHTML = r.ingredients.map((t,idx)=>{
+        return `<label class="inline" style="gap:8px; padding:6px 0">
+          <input type="checkbox" data-idx="${idx}" checked />
+          <span>${escapeHtml(t)}</span>
+        </label>`;
       }).join('');
     }
 
-    function toggleItem(id){ const it = shoppingList.find(x=>x.id===id); if (!it) return; it.checked=!it.checked; saveAll(); renderShopping(); }
-    function startEdit(id){ const it = shoppingList.find(x=>x.id===id); if (!it) return; it.editing=true; renderShopping(); }
-    function cancelEdit(id){ const it = shoppingList.find(x=>x.id===id); if (!it) return; delete it.editing; renderShopping(); }
-    function saveEdit(id){ const it = shoppingList.find(x=>x.id===id); if (!it) return; const inp = document.getElementById(`edit_${id}`); it.text = inp.value.trim(); delete it.editing; saveAll(); renderShopping(); }
-    function deleteItem(id){ shoppingList = shoppingList.filter(x=>x.id!==id); saveAll(); renderShopping(); }
+    daySave.addEventListener('click', () => {
+      const id = parseInt(dayRecipeSelect.value); if(!id){ alert('Kies eerst een recept'); return; }
+      const r = recipes.find(x=>x.id===id); if(!r) return;
+      weekPlan[currentDayKey] = { id: r.id, title: r.title };
+      saveWeek().then(()=>{ renderWeek(); closeDayModal(); });
+    });
+
+    dayRemoveBtn.addEventListener('click', () => {
+      if(currentDayKey && weekPlan[currentDayKey]){
+        delete weekPlan[currentDayKey];
+        saveWeek().then(()=>{ renderWeek(); closeDayModal(); });
+      }
+    });
+
+    addSelectedBtn.addEventListener('click', () => addFromDaySelection(false));
+    addAllBtn.addEventListener('click', () => addFromDaySelection(true));
+
+    function addFromDaySelection(all){
+      const id = parseInt(dayRecipeSelect.value); const r = recipes.find(x=>x.id===id); if(!r) return;
+      let toAdd = [];
+      if(all){ toAdd = r.ingredients; }
+      else {
+        const checks = dayIngredientsEl.querySelectorAll('input[type="checkbox"]');
+        checks.forEach(ch => { if(ch.checked){ const i = parseInt(ch.getAttribute('data-idx')); toAdd.push(r.ingredients[i]); } });
+      }
+      if(toAdd.length){
+        const items = toAdd.map(t=>({ id: Date.now()+Math.random(), text: t, checked:false }));
+        shoppingList.push(...items);
+        saveShopping().then(renderShopping);
+        alert(`Toegevoegd: ${toAdd.length} item(s)`);
+      }
+    }
+
+    /* ============================== Recepten ============================== */
+    addRecipeBtn.addEventListener('click', () => openRecipeModal());
+
+    function openRecipeModal(toEdit){
+      recipeModalTitle.textContent = toEdit ? 'Recept bewerken' : 'Nieuw recept';
+      recipeModal.style.display='flex';
+      manualMode();
+      portionBox.style.display = toEdit ? 'block' : 'none';
+    }
+    function closeRecipeModal(){ recipeModal.style.display='none'; clearRecipeForm(); editingRecipeId=null; }
+    recipeClose.addEventListener('click', closeRecipeModal); recipeCancel.addEventListener('click', closeRecipeModal);
+
+    function clearRecipeForm(){ titleEl.value=''; prepTimeEl.value=''; servingsEl.value=''; tagsEl.value=''; ingredientsEl.value=''; instructionsEl.value=''; recipeUrlEl.value=''; extractStatus.textContent=''; }
+
+    function manualMode(){ urlSection.style.display='none'; manualBtn.className='btn btn-prim'; urlBtn.className='btn btn-ghost'; }
+    function urlMode(){ urlSection.style.display='block'; manualBtn.className='btn btn-ghost'; urlBtn.className='btn btn-prim'; }
+    manualBtn.addEventListener('click', manualMode); urlBtn.addEventListener('click', urlMode);
+
+    recipeSave.addEventListener('click', () => {
+      const title = titleEl.value.trim(); const ing = ingredientsEl.value.trim();
+      if(!title || !ing){ alert('Vul minimaal titel en ingrediënten in'); return; }
+      const rec = {
+        id: editingRecipeId || Date.now(),
+        title,
+        prepTime: prepTimeEl.value.trim(),
+        servings: servingsEl.value.trim(),
+        tags: tagsEl.value.split(',').map(t=>t.trim()).filter(Boolean),
+        ingredients: ing.split('\n').map(s=>s.trim()).filter(Boolean),
+        instructions: instructionsEl.value.trim(),
+        dateAdded: editingRecipeId ? (recipes.find(r=>r.id===editingRecipeId)?.dateAdded || new Date().toLocaleDateString('nl-NL')) : new Date().toLocaleDateString('nl-NL')
+      };
+      if(editingRecipeId){ const i=recipes.findIndex(r=>r.id===editingRecipeId); if(i>-1) recipes[i]=rec; }
+      else { recipes.unshift(rec); }
+      saveRecipes().then(()=>{ renderRecipes(); closeRecipeModal(); });
+    });
+
+    function editRecipe(id){
+      const r = recipes.find(x=>x.id===id); if(!r) return;
+      editingRecipeId = id; openRecipeModal(true);
+      titleEl.value = r.title; prepTimeEl.value=r.prepTime||''; servingsEl.value=r.servings||'';
+      tagsEl.value = (r.tags||[]).join(', '); ingredientsEl.value=(r.ingredients||[]).join('\n'); instructionsEl.value=r.instructions||'';
+      portionBox.style.display='block';
+    }
+
+    function deleteRecipe(id){ if(!confirm('Weet je zeker dat je dit recept wilt verwijderen?')) return;
+      recipes = recipes.filter(r=>r.id!==id); saveRecipes().then(renderRecipes);
+    }
+
+    function addToShopping(recipeId){
+      const r = recipes.find(x=>x.id===recipeId); if(!r) return;
+      const items = r.ingredients.map(t=>({ id: Date.now()+Math.random(), text: t.replace(/^[-•]\s*/,''), checked:false }));
+      shoppingList.push(...items); saveShopping().then(renderShopping);
+    }
+
+    function viewRecipe(id){ const r=recipes.find(x=>x.id===id); if(!r) return; alert(`${r.title}\n\nIngrediënten:\n${r.ingredients.join('\n')}\n\nBereiding:\n${r.instructions||'-'}`); }
+
+    function renderRecipes(){
+      if(!recipes.length){ recipeGrid.innerHTML=''; recipesEmpty.style.display='block'; return; }
+      recipesEmpty.style.display='none';
+      recipeGrid.innerHTML = recipes.map(r=>`
+        <div class="recipe" onclick="viewRecipe(${r.id})">
+          <div class="top">
+            <div class="title">${escapeHtml(r.title)}</div>
+            <div class="inline" style="gap:6px">
+              <button class="btn btn-ghost" onclick="event.stopPropagation(); editRecipe(${r.id})">✏️</button>
+              <button class="btn btn-danger" onclick="event.stopPropagation(); deleteRecipe(${r.id})">🗑️</button>
+            </div>
+          </div>
+          <div class="muted" style="font-size:12px; margin:4px 0">${r.prepTime?`⏱️ ${escapeHtml(r.prepTime)}`:''} ${r.servings?` • 👥 ${escapeHtml(r.servings)}`:''}</div>
+          ${(r.tags&&r.tags.length)?`<div class="tags">${r.tags.map(t=>`<span class=tag>${escapeHtml(t)}</span>`).join('')}</div>`:''}
+          <div class="between" style="margin-top:6px">
+            <span class="muted" style="font-size:12px">Toegevoegd: ${escapeHtml(r.dateAdded)}</span>
+            <button class="btn btn-ghost" onclick="event.stopPropagation(); addToShopping(${r.id})">+ Boodschappen</button>
+          </div>
+        </div>`).join('');
+    }
+
+    // Portion adjust (assume base 4 → newPortions)
+    adjustBtn.addEventListener('click', () => {
+      const np = parseInt(newPortions.value,10); if(!np || np<1){ alert('Geef een geldig aantal personen'); return; }
+      const lines = ingredientsEl.value.split('\n');
+      const base = 4; const mul = np/base; const re = /^(\d+(?:[\.,]\d+)?)\s*(gram|g|ml|liter|l|kg|stuks?|eetlepels?|theelepels?|el|tl)\b/i;
+      const out = lines.map(s=> s.replace(re, (m,a,unit)=>{
+        const num = parseFloat(String(a).replace(',','.')); const val = Math.round(num*mul*10)/10; return `${val} ${unit}`;
+      }));
+      ingredientsEl.value = out.join('\n');
+      servingsEl.value = `${np} personen`;
+      portionNote.textContent = `✅ Ingrediënten aangepast voor ${np} personen.`;
+    });
+
+    // URL extraction
+    extractBtn?.addEventListener('click', async () => {
+      const url = (recipeUrlEl.value||'').trim(); if(!url){ alert('Vul eerst een URL in'); return; }
+      try{
+        extractStatus.textContent = 'Ophalen…';
+        const data = await extractRecipeFromUrl(url);
+        if(data.success){
+          titleEl.value = data.title||'';
+          prepTimeEl.value = data.prepTime||'';
+          servingsEl.value = data.servings||'';
+          ingredientsEl.value = data.ingredients||'';
+          instructionsEl.value = data.instructions||'';
+          tagsEl.value = data.tags||'';
+          portionBox.style.display = 'block';
+          extractStatus.textContent = `✅ Gevonden (${data.confidence}%)`;
+        } else {
+          extractStatus.textContent = `❌ ${data.error||'Geen receptgegevens gevonden'}`;
+        }
+      } catch(err){ extractStatus.textContent = '❌ Fout bij ophalen'; }
+    });
+
+    function manualOrUrl(){ return urlSection.style.display==='block' ? 'url' : 'manual'; }
+
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+
+    function extractFromJsonLd(doc){
+      try{
+        const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+        for(const sc of scripts){
+          try{
+            const data = JSON.parse(sc.textContent);
+            const arr = Array.isArray(data)?data:[data];
+            for(const item of arr){
+              const graph = item['@graph'];
+              const node = (item['@type']==='Recipe') ? item : (Array.isArray(graph)?graph.find(g=>g['@type']==='Recipe'):null);
+              if(node){
+                const ing = node.recipeIngredient ? (Array.isArray(node.recipeIngredient)?node.recipeIngredient.join('\n'):node.recipeIngredient) : '';
+                const instr = node.recipeInstructions ? (Array.isArray(node.recipeInstructions)?node.recipeInstructions.map(x=>x.text||x).join('\n'):node.recipeInstructions) : '';
+                return { success:true, title: node.name||'', ingredients: ing, instructions: instr, prepTime: node.prepTime||node.totalTime||'', servings: node.recipeYield||node.yield||'', tags: node.recipeCategory||node.recipeCuisine||'' };
+              }
+            }
+          }catch(e){}
+        }
+      }catch(e){}
+      return { success:false };
+    }
+
+    function extractFromAllerhande(doc){
+      try{
+        const title = (doc.querySelector('h1, [data-testhook="recipe-title"], .recipe-header__title')?.textContent||'').trim();
+        const ingSel = ['[data-testhook="recipe-ingredient"]','.recipe-ingredients__item','.ingredients-list__item','.recipe-ingredient','li[class*="ingredient"]'];
+        let ingredients = '';
+        for(const sel of ingSel){ const els = doc.querySelectorAll(sel); if(els.length){ ingredients = [...els].map(e=>e.textContent.trim().replace(/\s+/g,' ')).filter(Boolean).join('\n'); if(ingredients) break; } }
+        const stepSel = ['[data-testhook="recipe-instruction"]','.recipe-method__step','.recipe-instructions__step','ol li','.steps li'];
+        let instructions='';
+        for(const sel of stepSel){ const els = doc.querySelectorAll(sel); if(els.length){ instructions = [...els].map((e,i)=>`${i+1}. ${e.textContent.trim().replace(/\s+/g,' ')}`).join('\n\n'); if(instructions) break; } }
+        let servings = (doc.querySelector('[data-testhook="recipe-portions"], .servings, .yield, [class*="portion"], [class*="serving"]')?.textContent||'').trim();
+        let prepTime = (doc.querySelector('[data-testhook="recipe-duration"], .recipe-time, [class*="time"]')?.textContent||'').trim();
+        if(title && (ingredients || instructions)) return { success:true, title, ingredients: ingredients||'', instructions: instructions||'', servings, prepTime, tags:'allerhande' };
+      }catch(e){}
+      return { success:false };
+    }
+
+    function extractFromSmulweb(doc){
+      try{
+        const title = (doc.querySelector('h1, .recipe-title')?.textContent||'').trim();
+        const ingredients = [...doc.querySelectorAll('.ingredients li, .recipe-ingredients li')].map(e=>e.textContent.trim()).join('\n');
+        const instructions = [...doc.querySelectorAll('.directions li, .instructions li, .recipe-method li, ol li')].map((e,i)=>`${i+1}. ${e.textContent.trim()}`).join('\n\n');
+        if(title && ingredients) return { success:true, title, ingredients, instructions, tags:'smulweb' };
+      }catch(e){}
+      return { success:false };
+    }
+
+    function extractFromGeneric(doc){
+      try{
+        let title=''; for(const s of ['h1','.recipe-title','.entry-title','title']){ const el=doc.querySelector(s); if(el){ title=(el.textContent||'').trim(); if(title.length>3) break; } }
+        let ingredients='';
+        const groups=['.ingredients li','.recipe-ingredients li','ul li','ol li','li[class*="ingredient"]'];
+        for(const sel of groups){ const els=doc.querySelectorAll(sel); if(els.length>=3){ const arr=[...els].map(e=>e.textContent.trim().replace(/\s+/g,' ')).filter(t=>/\d|gram|ml|liter|stuks|eetlepel|theelepel|kg|pond/i.test(t)||t.length<50); if(arr.length>=3){ ingredients=arr.join('\n'); break; } } }
+        let instructions=''; for(const sel of ['.instructions li','.recipe-method li','.directions li','ol li']){ const els=doc.querySelectorAll(sel); if(els.length>=2){ instructions=[...els].map((e,i)=>`${i+1}. ${e.textContent.trim()}`).join('\n\n'); if(instructions) break; } }
+        if(title && (ingredients||instructions)) return { success:true, title, ingredients, instructions, tags:'generic' };
+      }catch(e){}
+      return { success:false };
+    }
+
+    async function extractRecipeFromUrl(url){
+      try{
+        const proxies=[
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+          `https://corsproxy.io/?${encodeURIComponent(url)}`,
+          `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+        ];
+        let html=null;
+        for(const p of proxies){
+          try{
+            const res = await fetch(p);
+            if(!res.ok) continue; const txt = await res.text();
+            if(p.includes('allorigins')){ const j=JSON.parse(txt); html=j.contents; } else { html=txt; }
+            if(html && html.length>500) break;
+          }catch(e){}
+        }
+        if(!html) return { success:false, error:'Website laden mislukt (CORS/anti-bot). Probeer kopiëren/plakken.' };
+        const parser = new DOMParser(); const doc = parser.parseFromString(html,'text/html');
+        let x = extractFromJsonLd(doc); if(x.success) return { ...x, confidence:95 };
+        if(/allerhande|ah\.nl/.test(url)){ x = extractFromAllerhande(doc); if(x.success) return { ...x, confidence:85 }; }
+        if(/smulweb\.nl/.test(url)){ x = extractFromSmulweb(doc); if(x.success) return { ...x, confidence:85 }; }
+        x = extractFromGeneric(doc); if(x.success) return { ...x, confidence:60 };
+        return { success:false, error:'Geen receptgegevens gevonden' };
+      }catch(e){ return { success:false, error:'Technische fout' } }
+    }
+
+    /* ============================== Boodschappenlijst ============================== */
+    function toggleItem(id){ const it = shoppingList.find(x=>x.id===id); if(it){ it.checked=!it.checked; saveShopping().then(renderShopping); } }
+
+    function startEditItem(id){ const row = document.querySelector(`[data-row="${id}"]`); if(!row) return;
+      row.querySelector('.shop-view').style.display='none';
+      row.querySelector('.shop-edit').style.display='flex';
+      row.querySelector('input[type="text"]').focus();
+    }
+    function cancelEditItem(id){ const row = document.querySelector(`[data-row="${id}"]`); if(!row) return;
+      row.querySelector('.shop-view').style.display='flex';
+      row.querySelector('.shop-edit').style.display='none';
+    }
+    function saveEditItem(id){ const row = document.querySelector(`[data-row="${id}"]`); if(!row) return;
+      const val = row.querySelector('input[type="text"]').value.trim();
+      const it = shoppingList.find(x=>x.id===id); if(it && val){ it.text = val; saveShopping().then(renderShopping); }
+    }
+    function removeItem(id){ shoppingList = shoppingList.filter(x=>x.id!==id); saveShopping().then(renderShopping); }
 
     copyListBtn.addEventListener('click', () => {
-      const text = shoppingList.filter(x=>!x.checked).map(x=>x.text).join('\n');
-      if (!text) return;
-      navigator.clipboard.writeText(text).then(()=> alert('Boodschappenlijst gekopieerd!')).catch(()=>{});
+      const txt = shoppingList.filter(x=>!x.checked).map(x=>x.text).join('\n');
+      if(txt) navigator.clipboard.writeText(txt).then(()=> alert('Boodschappenlijst gekopieerd!')); else alert('Niets om te kopiëren.');
     });
-    clearListBtn.addEventListener('click', ()=>{ if (confirm('Hele lijst wissen?')){ shoppingList=[]; saveAll(); renderShopping(); } });
+    clearListBtn.addEventListener('click', () => { if(confirm('Hele lijst wissen?')){ shoppingList=[]; saveShopping().then(renderShopping); } });
 
-    // ===== Helpers =====
-    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m])); }
-    function escapeAttr(s){ return escapeHtml(s).replace(/"/g,'&quot;'); }
+    function renderShopping(){
+      if(!shoppingList.length){ shoppingListEl.innerHTML=''; shoppingEmpty.style.display='block'; return; }
+      shoppingEmpty.style.display='none';
+      shoppingListEl.innerHTML = shoppingList.map(it=>`
+        <div class="shop-row ${it.checked?'checked':''}" data-row="${it.id}">
+          <input type="checkbox" ${it.checked?'checked':''} onclick="toggleItem(${it.id})" />
+          <div class="shop-view" style="display:flex; align-items:center; gap:10px; width:100%">
+            <span>${escapeHtml(it.text)}</span>
+            <div class="shop-actions">
+              <button class="btn btn-ghost" onclick="startEditItem(${it.id})">✏️</button>
+              <button class="btn btn-danger" onclick="removeItem(${it.id})">🗑️</button>
+            </div>
+          </div>
+          <div class="shop-edit">
+            <input type="text" value="${escapeHtml(it.text)}" />
+            <button class="btn btn-ok" onclick="saveEditItem(${it.id})">Opslaan</button>
+            <button class="btn btn-ghost" onclick="cancelEditItem(${it.id})">Annuleren</button>
+          </div>
+        </div>`).join('');
+    }
 
-    // ===== Init =====
-    (async function init(){
-      await loadAll();
-      // Guard: default to current week & optionally previous only
-      const currKey = weekKeyOf(currentWeekStart);
-      ensureWeekObj(currKey);
-      const prevKey = weekKeyOf(new Date(currentWeekStart.getTime()-7*24*3600*1000));
-      if (!weekPlans[prevKey]) { /* optional: keep empty until user goes back */ }
+    /* ============================== Render root ============================== */
+    function renderAll(){ renderRecipes(); renderShopping(); renderWeek(); }
 
-      renderRecipes();
-      renderShopping();
-      renderWeek();
+    /* ============================== SW register ============================== */
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    }
 
-      // Global handlers needed by inline HTML
-      window.deleteRecipe = deleteRecipe;
-      window.editRecipe = editRecipe;
-      window.viewRecipe = viewRecipe;
-      window.addRecipeToShopping = addRecipeToShopping;
+    /* ============================== Expose to window (for inline handlers) ============================== */
+    window.viewRecipe = viewRecipe;
+    window.deleteRecipe = deleteRecipe;
+    window.editRecipe = editRecipe;
+    window.addToShopping = addToShopping;
+    window.toggleItem = toggleItem;
+    window.startEditItem = startEditItem;
+    window.cancelEditItem = cancelEditItem;
+    window.saveEditItem = saveEditItem;
+    window.removeItem = removeItem;
 
-      window.toggleItem = toggleItem;
-      window.startEdit = startEdit;
-      window.cancelEdit = cancelEdit;
-      window.saveEdit = saveEdit;
-
-      // Recipe modal openers
-      window.openRecipeModal = openRecipeModal;
-    })();
+    // Init
+    loadAll();
   </script>
 </body>
 </html>
