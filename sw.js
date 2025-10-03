@@ -1,6 +1,6 @@
 // sw.js
 const CACHE_NAME = 'avondeten-v1';
-const TO_CACHE = ['/', '/index.html']; // voeg hier evt. andere assets aan toe
+const TO_CACHE = ['/', '/index.html']; // eventueel later uitbreiden met extra files
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(TO_CACHE)));
