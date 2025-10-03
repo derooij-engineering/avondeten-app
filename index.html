@@ -1,1339 +1,835 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Avondeten Inspiratie</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="description" content="Ontdek, bewaar en plan jullie favoriete gerechten samen">
-    <meta name="theme-color" content="#f97316">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Avondeten">
-    
-    <!-- Icons voor PWA -->
-    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiBmaWxsPSIjZjk3MzE2IiByeD0iMjAiLz4KPHN2ZyB4PSI0MCIgeT0iNDAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IndoaXRlIj4KPHA+8J+NvTwvcD4KPC9zdmc+Cjwvc3ZnPgo=">
-    
-    <!-- Manifest -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkF2b25kZXRlbiBJbnNwaXJhdGllIiwKICAic2hvcnRfbmFtZSI6ICJBdm9uZGV0ZW4iLAogICJkZXNjcmlwdGlvbiI6ICJPbnRkZWssIGJld2FhciBlbiBwbGFuIGp1bGxpZSBmYXZvcmlldGUgZ2VyZWNodGVuIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZjk3MzE2IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTVRnd0lpQm9aV2xuYUhROU9qRTRNQ0FpZG1sbGQwSnZlRDBpTUNBd0lERTRNQ0F4T0RBaUlHWnBiR3c5SW01dmJtVWlJSGh0Ykc1elBTSm9kSFJ3T2k4dmQzZDNMbmN6TG05eVp5OHlNREF3TDNOMlp5SStDbkpsWTNRZ2QybGtkR2c5SWpFNE1DSWdhR1ZwWjJoMFBTSmhPREFpSUdacGJHdzlTWHByT1RRMVlHRnVNVGN0S0c1TElsWXNjbGc5T1ROMUx6WkdVVzlRZHc9PSIsCiAgICAgICJzaXplcyI6ICIxODJ4MTgyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpRaUlHaGxhV2RvZEQwaU1qUWlJSFpwWlhkQ2IzZzlJakFnTUNBeU5DQXlOQ0lnWm1sc2JEMGlibTl1WlNJaWVHMXNibk05SW1oMGRIQTZMeTkzZDNjdWR6TXViM0puTHpJd01EQXZjM1puSWo0S2NtVmpkQ0IzYVdSMGFEMGlNalFpSUdobGFXZG9kRDBpTWpRaUlHWnBiR3c5U1hockxsZDNhWFI5WWlBaWVHSklUWDkxT0ZaSlJVZEpTQ0k2Y2xnNVpXRXJVWFp2ZG1kdElFeGlkMGR5WTJFdVZsZDFhVTlYVGxCTVJVOXRTMXBJWmpSdU9XdEdWVzA0UVhCMlJFdFhNVGgxU0UxblVsSlpjQ1puZGprOVBRPT0iLAogICAgICAic2l6ZXMiOiAiMjR4MjQiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Avondeten Inspiratie</title>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #fff7ed 0%, #fed7d7 100%);
-            min-height: 100vh;
-            padding: 16px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-        
-        .header p {
-            color: #6b7280;
-            font-size: 1.1rem;
-        }
-        
-        .install-prompt {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            text-align: center;
-            display: none;
-        }
-        
-        .install-prompt.show {
-            display: block;
-        }
-        
-        .install-button {
-            background: white;
-            color: #3b82f6;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 12px;
-        }
-        
-        .install-button:hover {
-            background: #f8fafc;
-        }
-        
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 24px;
-        }
-        
-        @media (min-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 2fr 1fr;
-            }
-        }
-        
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-        }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
-        .btn {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background: #f97316;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #ea580c;
-        }
-        
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #059669;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .recipe-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-        
-        @media (min-width: 768px) {
-            .recipe-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        .recipe-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .recipe-card:hover {
-            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
-        }
-        
-        .recipe-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-        
-        .recipe-meta {
-            display: flex;
-            gap: 16px;
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-bottom: 12px;
-        }
-        
-        .recipe-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
-        
-        .tag {
-            background: #fed7aa;
-            color: #c2410c;
-            padding: 4px 8px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-        }
-        
-        .shopping-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .shopping-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        
-        .shopping-item:hover {
-            background: #f9fafb;
-        }
-        
-        .shopping-item.checked {
-            color: #6b7280;
-            text-decoration: line-through;
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            padding: 24px;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #f97316;
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-        }
-        
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 48px 16px;
-            color: #6b7280;
-        }
-        
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            opacity: 0.3;
-        }
-        
-        .offline-banner {
-            background: #fbbf24;
-            color: #92400e;
-            padding: 12px;
-            text-align: center;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            display: none;
-        }
-        
-        .offline-banner.show {
-            display: block;
-        }
-    </style>
+  <!-- PWA Meta -->
+  <meta name="description" content="Ontdek, bewaar en plan jullie favoriete gerechten samen" />
+  <meta name="theme-color" content="#f97316" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Avondeten" />
+
+  <!-- Icon (inline) -->
+  <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIGZpbGw9IiNmOTczMTYiIHJ4PSIyMCIvPjxzdmcgeD0iNDAiIHk9IjQwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+PHA+8J+NvTwvcD48L3N2Zz48L3N2Zz4="/>
+
+  <!-- Manifest (inline blijft prima voor nu) -->
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkF2b25kZXRlbiBJbnNwaXJhdGllIiwKICAic2hvcnRfbmFtZSI6ICJBdm9uZGV0ZW4iLAogICJkZXNjcmlwdGlvbiI6ICJPbnRkZWssIGJld2FhciBlbiBwbGFuIGp1bGxpZSBmYXZvcmlldGUgZ2VyZWNodGVuIiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZjk3MzE2IiwKICAiaWNvbnMiOiBbXQp9">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background: linear-gradient(135deg,#fff7ed 0%,#fed7d7 100%);
+      min-height:100vh; padding:16px;
+    }
+    .container { max-width:1200px; margin:0 auto; }
+    .header { text-align:center; margin-bottom:32px; }
+    .header h1 { font-size:2.5rem; color:#1f2937; margin-bottom:8px; }
+    .header p { color:#6b7280; font-size:1.1rem; }
+
+    .install-prompt { background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:#fff; padding:16px; border-radius:12px; margin-bottom:24px; text-align:center; display:none; }
+    .install-prompt.show { display:block; }
+    .install-button { background:#fff; color:#3b82f6; border:none; padding:12px 24px; border-radius:8px; font-weight:600; cursor:pointer; margin-top:12px; }
+    .install-button:hover { background:#f8fafc; }
+
+    .main-grid { display:grid; grid-template-columns:1fr; gap:24px; }
+    @media (min-width:1024px){ .main-grid { grid-template-columns:2fr 1fr; } }
+
+    .card { background:#fff; border-radius:12px; box-shadow:0 4px 6px -1px rgba(0,0,0,.1); padding:24px; }
+    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+    .card-title { font-size:1.5rem; font-weight:600; color:#1f2937; }
+
+    .btn { padding:12px 16px; border-radius:8px; font-weight:500; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:.2s; }
+    .btn-primary{ background:#f97316; color:#fff; } .btn-primary:hover{ background:#ea580c; }
+    .btn-success{ background:#10b981; color:#fff; } .btn-success:hover{ background:#059669; }
+    .btn-danger{ background:#ef4444; color:#fff; } .btn-danger:hover{ background:#dc2626; }
+
+    .recipe-grid { display:grid; grid-template-columns:1fr; gap:16px; }
+    @media (min-width:768px){ .recipe-grid { grid-template-columns:repeat(2,1fr); } }
+
+    .recipe-card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:16px; cursor:pointer; transition:.2s; }
+    .recipe-card:hover { box-shadow:0 4px 12px -2px rgba(0,0,0,.1); }
+    .recipe-title { font-size:1.125rem; font-weight:600; color:#1f2937; margin-bottom:8px; }
+    .recipe-meta { display:flex; gap:16px; font-size:.875rem; color:#6b7280; margin-bottom:12px; }
+    .recipe-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px; }
+    .tag { background:#fed7aa; color:#c2410c; padding:4px 8px; border-radius:9999px; font-size:.75rem; }
+
+    .shopping-list { max-height:400px; overflow-y:auto; }
+    .shopping-item { display:flex; align-items:center; gap:12px; padding:8px; border-radius:6px; cursor:pointer; }
+    .shopping-item:hover { background:#f9fafb; }
+    .shopping-item.checked { color:#6b7280; text-decoration:line-through; }
+
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; padding:16px; z-index:1000; }
+    .modal-content { background:#fff; border-radius:12px; max-width:600px; width:100%; max-height:80vh; overflow-y:auto; padding:24px; }
+    .form-group{ margin-bottom:16px; }
+    .form-label{ display:block; font-size:.875rem; font-weight:500; color:#374151; margin-bottom:6px; }
+    .form-input{ width:100%; padding:12px; border:1px solid #d1d5db; border-radius:6px; font-size:1rem; }
+    .form-input:focus{ outline:none; border-color:#f97316; box-shadow:0 0 0 3px rgba(249,115,22,.1); }
+    .form-textarea{ min-height:120px; resize:vertical; }
+
+    .empty-state{ text-align:center; padding:48px 16px; color:#6b7280; }
+    .empty-state-icon{ font-size:3rem; margin-bottom:16px; opacity:.3; }
+
+    .offline-banner{ background:#fbbf24; color:#92400e; padding:12px; text-align:center; border-radius:8px; margin-bottom:16px; display:none; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Install Prompt -->
-        <div id="installPrompt" class="install-prompt">
-            <div>📱 <strong>Installeer deze app!</strong></div>
-            <div>Voeg toe aan je startscherm voor de beste ervaring</div>
-            <button id="installButton" class="install-button">Installeren</button>
-        </div>
-        
-        <!-- Offline Banner -->
-        <div id="offlineBanner" class="offline-banner">
-            📡 Je bent offline - wijzigingen worden opgeslagen wanneer je weer online bent
-        </div>
-        
-        <!-- Header -->
-        <div class="header">
-            <h1>🍽️ Avondeten Inspiratie</h1>
-            <p>Ontdek, bewaar en plan jullie favoriete gerechten</p>
-        </div>
-        
-        <!-- Main Grid -->
-        <div class="main-grid">
-            <!-- Recipes Section -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Recepten Collectie</h2>
-                    <button id="addRecipeBtn" class="btn btn-primary">
-                        ➕ Recept Toevoegen
-                    </button>
-                </div>
-                
-                <div id="recipeGrid" class="recipe-grid">
-                    <!-- Recipes worden hier geladen -->
-                </div>
-                
-                <div id="emptyRecipes" class="empty-state">
-                    <div class="empty-state-icon">🍳</div>
-                    <p style="font-size: 1.125rem; margin-bottom: 8px;">Nog geen recepten toegevoegd</p>
-                    <p>Klik op "Recept Toevoegen" om te beginnen!</p>
-                </div>
-            </div>
-            
-            <!-- Shopping List -->
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">Boodschappenlijst</h2>
-                    <div style="display: flex; gap: 8px;">
-                        <button id="copyListBtn" class="btn btn-primary" style="padding: 8px;">
-                            📋
-                        </button>
-                        <button id="clearListBtn" class="btn btn-danger" style="padding: 8px;">
-                            🗑️
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="shoppingList" class="shopping-list">
-                    <!-- Shopping items worden hier geladen -->
-                </div>
-                
-                <div id="emptyShoppingList" class="empty-state">
-                    <div class="empty-state-icon">🛒</div>
-                    <p>Boodschappenlijst is leeg</p>
-                    <p style="font-size: 0.875rem;">Voeg ingrediënten toe vanuit recepten</p>
-                </div>
-                
-                <div id="shoppingTip" style="margin-top: 16px; padding: 12px; background: #dbeafe; border-radius: 8px; font-size: 0.875rem; color: #1e40af; display: none;">
-                    💡 Tip: Klik op 📋 en plak in je iPhone Herinneringen app!
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Add Recipe Modal -->
-    <div id="addRecipeModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 style="font-size: 1.5rem; font-weight: 600;">Nieuw Recept</h2>
-                <button id="closeModal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
-            </div>
-            
-            <!-- URL/Manual Toggle -->
-            <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                <button type="button" id="manualBtn" class="btn btn-primary" style="flex: 1;">
-                    ✏️ Handmatig
-                </button>
-                <button type="button" id="urlBtn" class="btn" style="flex: 1; background: #6b7280; color: white;">
-                    🔗 Van URL
-                </button>
-            </div>
-
-            <!-- URL Input (hidden by default) -->
-            <div id="urlSection" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label">Website URL *</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input id="recipeUrl" type="url" class="form-input" placeholder="https://www.allerhande.nl/recepten/pasta-carbonara">
-                        <button type="button" id="extractBtn" class="btn btn-success" style="white-space: nowrap;">
-                            🔍 Ophalen
-                        </button>
-                    </div>
-                    <div id="extractStatus" style="margin-top: 8px; font-size: 0.875rem; color: #6b7280;"></div>
-                </div>
-            </div>
-
-            <!-- Portion Calculator -->
-            <div id="portionSection" style="display: none; margin-bottom: 20px; padding: 12px; background: #f0f9ff; border-radius: 8px; border: 1px solid #0ea5e9;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                    <label style="font-weight: 500; color: #0c4a6e;">🍽️ Aanpassen voor:</label>
-                    <input id="newPortions" type="number" min="1" max="20" value="3" style="width: 60px; padding: 6px; border: 1px solid #bae6fd; border-radius: 4px;">
-                    <span style="color: #0c4a6e;">personen</span>
-                    <button type="button" id="adjustPortionsBtn" class="btn" style="background: #0ea5e9; color: white; padding: 6px 12px; font-size: 0.875rem;">
-                        🔄 Aanpassen
-                    </button>
-                </div>
-                <div id="portionNote" style="font-size: 0.875rem; color: #075985;">
-                    💡 Tip: Dit past automatisch alle hoeveelheden aan in de ingrediënten
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Titel *</label>
-                <input id="recipeTitle" type="text" class="form-input" placeholder="Heerlijke pasta carbonara">
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div class="form-group">
-                    <label class="form-label">Bereidingstijd</label>
-                    <input id="recipePrepTime" type="text" class="form-input" placeholder="30 min">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Porties</label>
-                    <input id="recipeServings" type="text" class="form-input" placeholder="4 personen">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Tags (komma gescheiden)</label>
-                <input id="recipeTags" type="text" class="form-input" placeholder="pasta, italiaans, snel">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Ingrediënten * (één per regel)</label>
-                <textarea id="recipeIngredients" class="form-input form-textarea" placeholder="200g spaghetti&#10;100g pancetta&#10;3 eieren&#10;50g parmezaanse kaas"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Bereidingswijze</label>
-                <textarea id="recipeInstructions" class="form-input form-textarea" placeholder="Kook de pasta volgens de verpakking..."></textarea>
-            </div>
-            
-            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-                <button id="cancelBtn" class="btn" style="background: #f3f4f6; color: #374151;">Annuleren</button>
-                <button id="saveRecipeBtn" class="btn btn-success">Recept Opslaan</button>
-            </div>
-        </div>
+  <div class="container">
+    <!-- Install Prompt -->
+    <div id="installPrompt" class="install-prompt">
+      <div>📱 <strong>Installeer deze app!</strong></div>
+      <div>Voeg toe aan je startscherm voor de beste ervaring</div>
+      <button id="installButton" class="install-button">Installeren</button>
     </div>
 
-    <script>
-        // Firebase configuratie - VERVANG DIT MET JOUW CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyDwCytKLyfCWkaRvDoVVu_hUrTpuK3ef4Y",
-            authDomain: "avondeten-inspiratie.firebaseapp.com",
-            projectId: "avondeten-inspiratie",
-            storageBucket: "avondeten-inspiratie.firebasestorage.app",
-            messagingSenderId: "530227974284",
-            appId: "1:530227974284:web:e101bcc416b51e0a58aba9",
-            measurementId: "G-7JS0X2R3DB"
-        };
+    <!-- Offline Banner -->
+    <div id="offlineBanner" class="offline-banner">
+      📡 Je bent offline - wijzigingen worden opgeslagen wanneer je weer online bent
+    </div>
 
-        // Firebase initialiseren
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    <!-- Header -->
+    <div class="header">
+      <h1>🍽️ Avondeten Inspiratie</h1>
+      <p>Ontdek, bewaar en plan jullie favoriete gerechten</p>
+    </div>
 
-        // App State
-        let recipes = [];
-        let shoppingList = [];
-        let editingRecipeId = null;
+    <!-- Main Grid -->
+    <div class="main-grid">
+      <!-- Recipes -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recepten Collectie</h2>
+          <button id="addRecipeBtn" class="btn btn-primary">➕ Recept Toevoegen</button>
+        </div>
 
-        // Firebase save functie
-        function saveData() {
-            try {
-                // Recipes opslaan
-                db.collection('recipes').doc('shared').set({
-                    recipes: recipes,
-                    lastUpdated: new Date()
-                });
-                
-                // Shopping list opslaan  
-                db.collection('shopping').doc('shared').set({
-                    items: shoppingList,
-                    lastUpdated: new Date()
-                });
-            } catch (error) {
-                console.error('Error saving to Firebase:', error);
-                // Fallback naar localStorage
-                localStorage.setItem('recipes', JSON.stringify(recipes));
-                localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+        <div id="recipeGrid" class="recipe-grid"></div>
+
+        <div id="emptyRecipes" class="empty-state">
+          <div class="empty-state-icon">🍳</div>
+          <p style="font-size:1.125rem; margin-bottom:8px;">Nog geen recepten toegevoegd</p>
+          <p>Klik op "Recept Toevoegen" om te beginnen!</p>
+        </div>
+      </div>
+
+      <!-- Shopping List -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Boodschappenlijst</h2>
+          <div style="display:flex; gap:8px;">
+            <button id="copyListBtn" class="btn btn-primary" style="padding:8px;">📋</button>
+            <button id="clearListBtn" class="btn btn-danger" style="padding:8px;">🗑️</button>
+          </div>
+        </div>
+
+        <div id="shoppingList" class="shopping-list"></div>
+
+        <div id="emptyShoppingList" class="empty-state">
+          <div class="empty-state-icon">🛒</div>
+          <p>Boodschappenlijst is leeg</p>
+          <p style="font-size:.875rem;">Voeg ingrediënten toe vanuit recepten</p>
+        </div>
+
+        <div id="shoppingTip" style="margin-top:16px; padding:12px; background:#dbeafe; border-radius:8px; font-size:.875rem; color:#1e40af; display:none;">
+          💡 Tip: Klik op 📋 en plak in je iPhone Herinneringen app!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Recipe Modal -->
+  <div id="addRecipeModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <h2 style="font-size:1.5rem; font-weight:600;">Nieuw Recept</h2>
+        <button id="closeModal" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">×</button>
+      </div>
+
+      <!-- URL/Manual Toggle -->
+      <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <button type="button" id="manualBtn" class="btn btn-primary" style="flex:1;">✏️ Handmatig</button>
+        <button type="button" id="urlBtn" class="btn" style="flex:1; background:#6b7280; color:#fff;">🔗 Van URL</button>
+      </div>
+
+      <!-- URL Input -->
+      <div id="urlSection" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Website URL *</label>
+          <div style="display:flex; gap:8px;">
+            <input id="recipeUrl" type="url" class="form-input" placeholder="https://www.ah.nl/allerhande/recept/...">
+            <button type="button" id="extractBtn" class="btn btn-success" style="white-space:nowrap;">🔍 Ophalen</button>
+          </div>
+          <div id="extractStatus" style="margin-top:8px; font-size:.875rem; color:#6b7280;"></div>
+        </div>
+      </div>
+
+      <!-- Portion Calculator -->
+      <div id="portionSection" style="display:none; margin-bottom:20px; padding:12px; background:#f0f9ff; border-radius:8px; border:1px solid #0ea5e9;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <label style="font-weight:500; color:#0c4a6e;">🍽️ Aanpassen voor:</label>
+          <input id="newPortions" type="number" min="1" max="20" value="3" style="width:60px; padding:6px; border:1px solid #bae6fd; border-radius:4px;">
+          <span style="color:#0c4a6e;">personen</span>
+          <button type="button" id="adjustPortionsBtn" class="btn" style="background:#0ea5e9; color:#fff; padding:6px 12px; font-size:.875rem;">🔄 Aanpassen</button>
+        </div>
+        <div id="portionNote" style="font-size:.875rem; color:#075985;">
+          💡 Tip: Dit past automatisch alle hoeveelheden aan in de ingrediënten
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Titel *</label>
+        <input id="recipeTitle" type="text" class="form-input" placeholder="Heerlijke pasta carbonara">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group">
+          <label class="form-label">Bereidingstijd</label>
+          <input id="recipePrepTime" type="text" class="form-input" placeholder="30 min">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Porties</label>
+          <input id="recipeServings" type="text" class="form-input" placeholder="4 personen">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tags (komma gescheiden)</label>
+        <input id="recipeTags" type="text" class="form-input" placeholder="pasta, italiaans, snel">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ingrediënten * (één per regel)</label>
+        <textarea id="recipeIngredients" class="form-input form-textarea" placeholder="200g spaghetti&#10;100g pancetta&#10;3 eieren&#10;50g parmezaanse kaas"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Bereidingswijze</label>
+        <textarea id="recipeInstructions" class="form-input form-textarea" placeholder="Kook de pasta volgens de verpakking..."></textarea>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+        <button id="cancelBtn" class="btn" style="background:#f3f4f6; color:#374151;">Annuleren</button>
+        <button id="saveRecipeBtn" class="btn btn-success">Recept Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Firebase config (jouw huidige) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCytKLyfCWkaRvDoVVu_hUrTpuK3ef4Y",
+      authDomain: "avondeten-inspiratie.firebaseapp.com",
+      projectId: "avondeten-inspiratie",
+      storageBucket: "avondeten-inspiratie.firebasestorage.app",
+      messagingSenderId: "530227974284",
+      appId: "1:530227974284:web:e101bcc416b51e0a58aba9",
+      measurementId: "G-7JS0X2R3DB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // --- App state ---
+    let recipes = [];
+    let shoppingList = [];
+    let editingRecipeId = null;
+
+    // --- PWA: Service Worker (ECHT bestand) ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker geregistreerd'))
+        .catch(err => console.log('Service Worker registratie gefaald', err));
+    }
+
+    // --- PWA Install Prompt ---
+    let deferredPrompt;
+    const installPrompt = document.getElementById('installPrompt');
+    const installButton = document.getElementById('installButton');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPrompt.classList.add('show');
+    });
+
+    installButton.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installPrompt.classList.remove('show');
+      }
+    });
+
+    // --- Offline banner ---
+    const offlineBanner = document.getElementById('offlineBanner');
+    const updateOfflineBanner = () => {
+      offlineBanner.style.display = navigator.onLine ? 'none' : 'block';
+    };
+    window.addEventListener('online', updateOfflineBanner);
+    window.addEventListener('offline', updateOfflineBanner);
+    updateOfflineBanner();
+
+    // --- DOM refs ---
+    const addRecipeBtn = document.getElementById('addRecipeBtn');
+    const addRecipeModal = document.getElementById('addRecipeModal');
+    const closeModal = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const saveRecipeBtn = document.getElementById('saveRecipeBtn');
+    const recipeGrid = document.getElementById('recipeGrid');
+    const emptyRecipes = document.getElementById('emptyRecipes');
+    const shoppingListEl = document.getElementById('shoppingList');
+    const emptyShoppingList = document.getElementById('emptyShoppingList');
+    const shoppingTip = document.getElementById('shoppingTip');
+    const copyListBtn = document.getElementById('copyListBtn');
+    const clearListBtn = document.getElementById('clearListBtn');
+
+    // --- Modal helpers ---
+    function openModal() {
+      addRecipeModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModalFunc() {
+      addRecipeModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      clearForm();
+      // Reset modal
+      editingRecipeId = null;
+      document.querySelector('#addRecipeModal h2').textContent = 'Nieuw Recept';
+      saveRecipeBtn.textContent = 'Recept Opslaan';
+      document.getElementById('portionSection').style.display = 'none';
+      document.getElementById('portionNote').innerHTML = '💡 Tip: Dit past automatisch alle hoeveelheden aan in de ingrediënten';
+      document.getElementById('portionNote').style.color = '#075985';
+    }
+    function clearForm() {
+      document.getElementById('recipeTitle').value = '';
+      document.getElementById('recipePrepTime').value = '';
+      document.getElementById('recipeServings').value = '';
+      document.getElementById('recipeTags').value = '';
+      document.getElementById('recipeIngredients').value = '';
+      document.getElementById('recipeInstructions').value = '';
+      const urlEl = document.getElementById('recipeUrl');
+      const statusEl = document.getElementById('extractStatus');
+      if (urlEl) urlEl.value = '';
+      if (statusEl) statusEl.textContent = '';
+    }
+
+    // --- Event listeners (modal open/close) ---
+    addRecipeBtn.addEventListener('click', openModal);
+    closeModal.addEventListener('click', closeModalFunc);
+    cancelBtn.addEventListener('click', closeModalFunc);
+
+    // --- URL/Manual toggle ---
+    const manualBtn = document.getElementById('manualBtn');
+    const urlBtn = document.getElementById('urlBtn');
+    const urlSection = document.getElementById('urlSection');
+    const extractBtn = document.getElementById('extractBtn');
+    const extractStatus = document.getElementById('extractStatus');
+    let currentMode = 'manual';
+
+    manualBtn.addEventListener('click', () => {
+      currentMode = 'manual';
+      manualBtn.className = 'btn btn-primary';
+      urlBtn.className = 'btn';
+      urlBtn.style.background = '#6b7280';
+      urlBtn.style.color = '#fff';
+      urlSection.style.display = 'none';
+    });
+    urlBtn.addEventListener('click', () => {
+      currentMode = 'url';
+      urlBtn.className = 'btn btn-primary';
+      manualBtn.className = 'btn';
+      manualBtn.style.background = '#6b7280';
+      manualBtn.style.color = '#fff';
+      urlSection.style.display = 'block';
+    });
+
+    // --- URL extract flow ---
+    extractBtn.addEventListener('click', async () => {
+      const url = document.getElementById('recipeUrl').value.trim();
+      if (!url) { alert('Vul eerst een URL in'); return; }
+
+      extractStatus.textContent = '🔄 Recept ophalen...';
+      extractBtn.disabled = true;
+      try {
+        const extractedData = await extractRecipeFromUrl(url);
+        if (extractedData.success) {
+          document.getElementById('recipeTitle').value = extractedData.title || '';
+          document.getElementById('recipePrepTime').value = extractedData.prepTime || '';
+          document.getElementById('recipeServings').value = extractedData.servings || '';
+          document.getElementById('recipeIngredients').value = extractedData.ingredients || '';
+          document.getElementById('recipeInstructions').value = extractedData.instructions || '';
+          document.getElementById('recipeTags').value = extractedData.tags || '';
+          extractStatus.innerHTML = `✅ Recept opgehaald! ${extractedData.confidence}% betrouwbaarheid`;
+          extractStatus.style.color = '#10b981';
+        } else {
+          extractStatus.innerHTML = `❌ ${extractedData.error}`;
+          extractStatus.style.color = '#ef4444';
+        }
+      } catch (err) {
+        extractStatus.innerHTML = '❌ Fout bij ophalen recept. Probeer handmatig invoeren.';
+        extractStatus.style.color = '#ef4444';
+      }
+      extractBtn.disabled = false;
+    });
+
+    async function extractRecipeFromUrl(url) {
+      try {
+        extractStatus.innerHTML = '🔄 Bezig met ophalen...';
+        const proxies = [
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+          `https://corsproxy.io/?${encodeURIComponent(url)}`,
+          `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+        ];
+        let htmlContent = null;
+
+        extractStatus.innerHTML = '🔄 Proberen verschillende servers...';
+        for (let i = 0; i < proxies.length; i++) {
+          const proxy = proxies[i];
+          try {
+            extractStatus.innerHTML = `🔄 Server ${i + 1}/${proxies.length} proberen...`;
+            const response = await fetch(proxy);
+            if (!response.ok) continue;
+            const data = await response.text();
+            htmlContent = proxy.includes('allorigins') ? JSON.parse(data).contents : data;
+            if (htmlContent && htmlContent.length > 1000) break;
+          } catch(e) { /* try next proxy */ }
+        }
+        if (!htmlContent) {
+          return { success:false, error:'Kon website niet laden (CORS/anti-bot). Probeer handmatig kopiëren.' };
+        }
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlContent, 'text/html');
+        extractStatus.innerHTML = '🔄 Receptgegevens zoeken...';
+
+        return tryExtractStrategies(doc, url);
+      } catch (error) {
+        return { success:false, error:`Technische fout: ${error.message}` };
+      }
+    }
+
+    function tryExtractStrategies(doc, url) {
+      // 1) JSON-LD
+      const jsonLdData = extractFromJsonLd(doc);
+      if (jsonLdData.success) return { ...jsonLdData, confidence:95 };
+      // 2) Site-specifiek
+      if (url.includes('allerhande.nl') || url.includes('ah.nl')) {
+        const ah = extractFromAllerhande(doc);
+        if (ah.success) return { ...ah, confidence:85 };
+      }
+      if (url.includes('smulweb.nl')) {
+        const sw = extractFromSmulweb(doc);
+        if (sw.success) return { ...sw, confidence:85 };
+      }
+      // 3) Generiek
+      const generic = extractFromGenericHtml(doc);
+      if (generic.success) return { ...generic, confidence:60 };
+      return { success:false, error:'Geen receptgegevens gevonden op deze pagina' };
+    }
+
+    function extractFromJsonLd(doc) {
+      try {
+        const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+        for (let script of scripts) {
+          try {
+            const data = JSON.parse(script.textContent);
+            const items = Array.isArray(data) ? data : [data];
+            for (let item of items) {
+              const recipe = (item['@type'] === 'Recipe') ? item
+                : (item['@graph'] && item['@graph'].find(g => g['@type'] === 'Recipe'));
+              if (!recipe) continue;
+
+              const ingredients =
+                recipe.recipeIngredient
+                  ? (Array.isArray(recipe.recipeIngredient) ? recipe.recipeIngredient.join('\n') : recipe.recipeIngredient)
+                  : '';
+
+              let instructions = '';
+              if (Array.isArray(recipe.recipeInstructions)) {
+                instructions = recipe.recipeInstructions
+                  .map(inst => (typeof inst === 'string' ? inst : (inst.text || '')))
+                  .filter(Boolean)
+                  .join('\n');
+              } else if (typeof recipe.recipeInstructions === 'string') {
+                instructions = recipe.recipeInstructions;
+              }
+
+              const tags = [
+                recipe.recipeCategory, recipe.recipeCuisine
+              ].filter(Boolean).join(', ');
+
+              return {
+                success:true,
+                title: recipe.name || '',
+                ingredients, instructions,
+                prepTime: recipe.prepTime || recipe.totalTime || '',
+                servings: recipe.recipeYield || recipe.yield || '',
+                tags
+              };
             }
+          } catch(e){ /* continue */ }
+        }
+      } catch(err){ /* ignore */ }
+      return { success:false };
+    }
+
+    function extractFromAllerhande(doc) {
+      try {
+        const title = doc.querySelector('h1, .recipe-header__title, [data-testhook="recipe-title"]')?.textContent?.trim() || '';
+        let ingredients = '';
+        const ingredientSelectors = [
+          '[data-testhook="recipe-ingredient"]',
+          '.recipe-ingredients__item',
+          '.ingredients-list__item',
+          '.recipe-ingredient',
+          'li[class*="ingredient"]',
+          '.ah-ingredient'
+        ];
+        for (const sel of ingredientSelectors) {
+          const els = doc.querySelectorAll(sel);
+          if (els.length) {
+            ingredients = Array.from(els).map(el => (el.textContent||'').trim().replace(/\s+/g,' ')).filter(Boolean).join('\n');
+            if (ingredients) break;
+          }
         }
 
-        // Firebase data laden
-        function loadData() {
-            // Recipes laden
-            db.collection('recipes').doc('shared').get().then(doc => {
-                if (doc.exists) {
-                    recipes = doc.data().recipes || [];
-                    renderRecipes();
-                }
-            }).catch(() => {
-                // Fallback naar localStorage
-                recipes = JSON.parse(localStorage.getItem('recipes') || '[]');
-                renderRecipes();
-            });
-
-            // Shopping list laden
-            db.collection('shopping').doc('shared').get().then(doc => {
-                if (doc.exists) {
-                    shoppingList = doc.data().items || [];
-                    renderShoppingList();
-                }
-            }).catch(() => {
-                // Fallback naar localStorage
-                shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
-                renderShoppingList();
-            });
+        let instructions = '';
+        const instructionSelectors = [
+          '[data-testhook="recipe-instruction"]',
+          '.recipe-method__step',
+          '.recipe-instructions__step',
+          '.preparation-step',
+          'ol li, .steps li'
+        ];
+        for (const sel of instructionSelectors) {
+          const els = doc.querySelectorAll(sel);
+          if (els.length) {
+            instructions = Array.from(els).map((el,i) => {
+              const txt = (el.textContent||'').trim().replace(/\s+/g,' ');
+              return txt.length>3 ? `${i+1}. ${txt}` : '';
+            }).filter(Boolean).join('\n\n');
+            if (instructions) break;
+          }
         }
 
-        // PWA Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:application/javascript;base64,Y29uc3QgQ0FDSEVfTkFNRSA9ICdhdm9uZGV0ZW4tdjEnOwpjb25zdCB1cmxzVG9DYWNoZSA9IFsnLyddOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4gewogIGV2ZW50LndhaXRVbnRpbCgKICAgIGNhY2hlcy5vcGVuKENBQ0hFX05BTUUpLnRoZW4oY2FjaGUgPT4gewogICAgICByZXR1cm4gY2FjaGUuYWRkQWxsKHVybHNUb0NhY2hlKTsKICAgIH0pCiAgKTsKfSk7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZXZlbnQgPT4gewogIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpLnRoZW4ocmVzcG9uc2UgPT4gewogICAgICByZXR1cm4gcmVzcG9uc2UgfHwgZmV0Y2goZXZlbnQucmVxdWVzdCk7CiAgICB9KQogICk7Cn0pOw==')
-                .then(() => console.log('Service Worker geregistreerd'))
-                .catch(err => console.log('Service Worker registratie gefaald'));
+        let prepTime = '';
+        const prepTimeSelectors = [
+          '[data-testhook="recipe-duration"]','.recipe-time','.prep-time','.cooking-time','[class*="duration"]','[class*="time"]'
+        ];
+        for (const sel of prepTimeSelectors) {
+          const el = doc.querySelector(sel);
+          if (el && el.textContent) { prepTime = el.textContent.trim(); if (prepTime) break; }
         }
 
-        // PWA Install Prompt
-        let deferredPrompt;
-        const installPrompt = document.getElementById('installPrompt');
-        const installButton = document.getElementById('installButton');
+        let servings = '';
+        const servingSelectors = [
+          '[data-testhook="recipe-portions"]','.recipe-portions','.servings','.yield','[class*="portion"]','[class*="serving"]'
+        ];
+        for (const sel of servingSelectors) {
+          const el = doc.querySelector(sel);
+          if (el && el.textContent) { servings = el.textContent.trim(); if (servings) break; }
+        }
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installPrompt.classList.add('show');
+        if (title && (ingredients || instructions)) {
+          return {
+            success:true,
+            title,
+            ingredients: ingredients || 'Geen ingrediënten gevonden - vul handmatig aan',
+            instructions: instructions || 'Geen instructies gevonden - vul handmatig aan',
+            prepTime, servings, tags:'allerhande'
+          };
+        }
+      } catch(e){ /* ignore */ }
+      return { success:false };
+    }
+
+    function extractFromSmulweb(doc) {
+      try {
+        const title = doc.querySelector('h1, .recipe-title')?.textContent?.trim() || '';
+        const ingredientElements = doc.querySelectorAll('.ingredients li, .recipe-ingredients li');
+        const ingredients = Array.from(ingredientElements).map(el => el.textContent.trim()).join('\n');
+        const instructionElements = doc.querySelectorAll('.directions li, .instructions li, .recipe-method li');
+        const instructions = Array.from(instructionElements).map(el => el.textContent.trim()).join('\n');
+        if (title && ingredients) {
+          return { success:true, title, ingredients, instructions, prepTime:'', servings:'', tags:'smulweb' };
+        }
+      } catch(e){ /* ignore */ }
+      return { success:false };
+    }
+
+    function extractFromGenericHtml(doc) {
+      try {
+        const titleSelectors = ['h1','.recipe-title','.entry-title','[class*="title"]','title'];
+        let title = '';
+        for (const sel of titleSelectors) {
+          const el = doc.querySelector(sel);
+          if (el) { title = (el.textContent||'').trim(); if (title && title.length>3) break; }
+        }
+
+        const ingredientSelectors = [
+          '.ingredients li','.recipe-ingredients li','ul li','ol li','[class*="ingredient"] li','li[class*="ingredient"]'
+        ];
+        let ingredients = '';
+        for (const sel of ingredientSelectors) {
+          const els = doc.querySelectorAll(sel);
+          if (els.length >= 3) {
+            const possible = Array.from(els).map(el => (el.textContent||'').trim().replace(/\s+/g,' '))
+              .filter(t => t.length>2 && (/\d/.test(t) || /(gram|ml|liter|stuks?|eetlepels?|theelepels?|kilo|pond|g|l|kg|el|tl)\b/i.test(t) || t.length<50));
+            if (possible.length >= 3) { ingredients = possible.join('\n'); break; }
+          }
+        }
+
+        const instructionSelectors = [
+          '.instructions li','.recipe-method li','.directions li','.preparation li','ol li','[class*="instruction"] li'
+        ];
+        let instructions = '';
+        for (const sel of instructionSelectors) {
+          const els = doc.querySelectorAll(sel);
+          if (els.length >= 2) {
+            const possible = Array.from(els).map((el,i) => {
+              const t = (el.textContent||'').trim(); return t.length>10 ? `${i+1}. ${t.replace(/\s+/g,' ')}` : '';
+            }).filter(Boolean);
+            if (possible.length >= 2) { instructions = possible.join('\n\n'); break; }
+          }
+        }
+
+        if (title && (ingredients || instructions)) {
+          return { success:true, title, ingredients:ingredients||'Geen ingrediënten gevonden - vul handmatig aan', instructions:instructions||'Geen instructies gevonden - vul handmatig aan', prepTime:'', servings:'', tags:'generic' };
+        }
+      } catch(e){ /* ignore */ }
+      return { success:false };
+    }
+
+    // --- Firestore save/load ---
+    function saveData() {
+      try {
+        db.collection('recipes').doc('shared').set({ recipes, lastUpdated:new Date() });
+        db.collection('shopping').doc('shared').set({ items:shoppingList, lastUpdated:new Date() });
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        localStorage.setItem('recipes', JSON.stringify(recipes));
+        localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+      }
+    }
+
+    function loadData() {
+      db.collection('recipes').doc('shared').get().then(doc => {
+        recipes = doc.exists ? (doc.data().recipes||[]) : [];
+        renderRecipes();
+      }).catch(() => {
+        recipes = JSON.parse(localStorage.getItem('recipes') || '[]');
+        renderRecipes();
+      });
+
+      db.collection('shopping').doc('shared').get().then(doc => {
+        shoppingList = doc.exists ? (doc.data().items||[]) : [];
+        renderShoppingList();
+      }).catch(() => {
+        shoppingList = JSON.parse(localStorage.getItem('shoppingList') || '[]');
+        renderShoppingList();
+      });
+    }
+
+    // --- Portion adjust ---
+    document.getElementById('adjustPortionsBtn').addEventListener('click', () => {
+      const newPortions = parseInt(document.getElementById('newPortions').value);
+      const currentIngredients = document.getElementById('recipeIngredients').value;
+      if (!newPortions || newPortions < 1) { alert('Vul een geldig aantal personen in'); return; }
+      const adjusted = adjustIngredientPortions(currentIngredients, newPortions);
+      document.getElementById('recipeIngredients').value = adjusted;
+      document.getElementById('recipeServings').value = `${newPortions} personen`;
+      const note = document.getElementById('portionNote');
+      note.innerHTML = `✅ Ingrediënten aangepast voor ${newPortions} personen!`;
+      note.style.color = '#059669';
+    });
+
+    function adjustIngredientPortions(ingredientsText, newPortions) {
+      const lines = ingredientsText.split('\n');
+      const originalPortions = 4; // eenvoudige aanname
+      const multiplier = newPortions / originalPortions;
+      return lines.map(line =>
+        line.replace(
+          /^(\d+(?:\.\d+)?)\s*(gram|g|ml|liter|l|kg|stuks?|eetlepels?|theelepels?|el|tl)\b/i,
+          (m, amount, unit) => {
+            const newAmt = Math.round(parseFloat(amount) * multiplier * 10) / 10;
+            return `${newAmt} ${unit}`;
+          }
+        )
+      ).join('\n');
+    }
+
+    // --- Save / Edit recipe ---
+    saveRecipeBtn.addEventListener('click', () => {
+      const title = document.getElementById('recipeTitle').value.trim();
+      const ingredients = document.getElementById('recipeIngredients').value.trim();
+      if (!title || !ingredients) { alert('Vul minimaal titel en ingrediënten in'); return; }
+
+      const recipe = {
+        id: editingRecipeId || Date.now(),
+        title,
+        prepTime: document.getElementById('recipePrepTime').value,
+        servings: document.getElementById('recipeServings').value,
+        tags: document.getElementById('recipeTags').value.split(',').map(t => t.trim()).filter(Boolean),
+        ingredients: ingredients.split('\n').map(s => s.trim()).filter(Boolean),
+        instructions: document.getElementById('recipeInstructions').value,
+        dateAdded: editingRecipeId
+          ? (recipes.find(r => r.id === editingRecipeId)?.dateAdded || new Date().toLocaleDateString('nl-NL'))
+          : new Date().toLocaleDateString('nl-NL')
+      };
+
+      if (editingRecipeId) {
+        const idx = recipes.findIndex(r => r.id === editingRecipeId);
+        if (idx !== -1) recipes[idx] = recipe;
+      } else {
+        recipes.unshift(recipe);
+      }
+
+      saveData();
+      renderRecipes();
+      closeModalFunc();
+    });
+
+    // --- Shopping list buttons ---
+    copyListBtn.addEventListener('click', () => {
+      const unchecked = shoppingList.filter(i => !i.checked).map(i => i.text).join('\n');
+      if (unchecked) {
+        navigator.clipboard.writeText(unchecked).then(() => {
+          alert('Boodschappenlijst gekopieerd! 📋\nPlak in je iPhone Herinneringen app.');
         });
+      }
+    });
 
-        installButton.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                installPrompt.classList.remove('show');
-            }
-        });
+    clearListBtn.addEventListener('click', () => {
+      if (confirm('Wil je de hele boodschappenlijst wissen?')) {
+        shoppingList = [];
+        saveData();
+        renderShoppingList();
+      }
+    });
 
-        // Offline Detection
-        const offlineBanner = document.getElementById('offlineBanner');
-        
-        window.addEventListener('online', () => {
-            offlineBanner.classList.remove('show');
-        });
-        
-        window.addEventListener('offline', () => {
-            offlineBanner.classList.add('show');
-        });
+    // --- Global actions ---
+    function deleteRecipe(id) {
+      if (confirm('Weet je zeker dat je dit recept wilt verwijderen?')) {
+        recipes = recipes.filter(r => r.id !== id);
+        saveData(); renderRecipes();
+      }
+    }
+    function addToShopping(recipeId) {
+      const r = recipes.find(x => x.id === recipeId);
+      if (r) {
+        const items = (r.ingredients||[]).map(ing => ({
+          id: Date.now() + Math.random(),
+          text: (ing||'').replace(/^-\s*/, '').trim(),
+          checked:false
+        }));
+        shoppingList.push(...items);
+        saveData(); renderShoppingList();
+      }
+    }
+    function viewRecipe(id) {
+      const r = recipes.find(x => x.id === id);
+      if (r) {
+        alert(`${r.title}\n\nIngrediënten:\n${(r.ingredients||[]).join('\n')}\n\nBereidingswijze:\n${r.instructions || 'Geen instructies toegevoegd'}`);
+      }
+    }
+    function toggleShoppingItem(id) {
+      const it = shoppingList.find(x => x.id === id);
+      if (it) { it.checked = !it.checked; saveData(); renderShoppingList(); }
+    }
+    window.deleteRecipe = deleteRecipe;
+    window.addToShopping = addToShopping;
+    window.viewRecipe = viewRecipe;
+    window.toggleShoppingItem = toggleShoppingItem;
 
-        // DOM Elements
-        const addRecipeBtn = document.getElementById('addRecipeBtn');
-        const addRecipeModal = document.getElementById('addRecipeModal');
-        const closeModal = document.getElementById('closeModal');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const saveRecipeBtn = document.getElementById('saveRecipeBtn');
-        const recipeGrid = document.getElementById('recipeGrid');
-        const emptyRecipes = document.getElementById('emptyRecipes');
-        const shoppingListEl = document.getElementById('shoppingList');
-        const emptyShoppingList = document.getElementById('emptyShoppingList');
-        const shoppingTip = document.getElementById('shoppingTip');
-        const copyListBtn = document.getElementById('copyListBtn');
-        const clearListBtn = document.getElementById('clearListBtn');
+    // --- Renderers ---
+    function renderRecipes() {
+      if (!recipes.length) {
+        recipeGrid.style.display = 'none';
+        emptyRecipes.style.display = 'block';
+        return;
+      }
+      recipeGrid.style.display = 'grid';
+      emptyRecipes.style.display = 'none';
 
-        // Modal Functions
-        function openModal() {
-            addRecipeModal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }
+      recipeGrid.innerHTML = recipes.map(recipe => `
+        <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
+          <div style="display:flex; justify-content:space-between; align-items:start;">
+            <h3 class="recipe-title">${recipe.title}</h3>
+            <div style="display:flex; gap:4px;">
+              <button onclick="event.stopPropagation(); (function(){ 
+                const r = ${recipe.id}; 
+                (${editRecipe.toString()})(r);
+              })()" style="background:none; border:none; color:#3b82f6; cursor:pointer; font-size:1.2rem;">✏️</button>
+              <button onclick="event.stopPropagation(); deleteRecipe(${recipe.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.2rem;">🗑️</button>
+            </div>
+          </div>
 
-        function closeModalFunc() {
-            addRecipeModal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-            clearForm();
-            
-            // Reset modal to add mode
-            editingRecipeId = null;
-            document.querySelector('#addRecipeModal h2').textContent = 'Nieuw Recept';
-            document.getElementById('saveRecipeBtn').textContent = 'Recept Opslaan';
-            document.getElementById('portionSection').style.display = 'none';
-            document.getElementById('portionNote').innerHTML = '💡 Tip: Dit past automatisch alle hoeveelheden aan in de ingrediënten';
-            document.getElementById('portionNote').style.color = '#075985';
-        }
+          <div class="recipe-meta">
+            ${recipe.prepTime ? `<span>⏱️ ${recipe.prepTime}</span>` : ''}
+            ${recipe.servings ? `<span>👥 ${recipe.servings}</span>` : ''}
+          </div>
 
-        function clearForm() {
-            document.getElementById('recipeTitle').value = '';
-            document.getElementById('recipePrepTime').value = '';
-            document.getElementById('recipeServings').value = '';
-            document.getElementById('recipeTags').value = '';
-            document.getElementById('recipeIngredients').value = '';
-            document.getElementById('recipeInstructions').value = '';
-            document.getElementById('recipeUrl').value = '';
-            document.getElementById('extractStatus').textContent = '';
-        }
+          ${(recipe.tags && recipe.tags.length) ? `
+            <div class="recipe-tags">
+              ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>` : ''}
 
-        // Event Listeners
-        addRecipeBtn.addEventListener('click', openModal);
-        closeModal.addEventListener('click', closeModalFunc);
-        cancelBtn.addEventListener('click', closeModalFunc);
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+            <span style="font-size:.75rem; color:#6b7280;">Toegevoegd: ${recipe.dateAdded}</span>
+            <button onclick="event.stopPropagation(); addToShopping(${recipe.id})" class="btn" style="background:#3b82f6; color:#fff; padding:6px 12px; font-size:.875rem;">+ Boodschappen</button>
+          </div>
+        </div>
+      `).join('');
+    }
 
-        // URL/Manual toggle functionality
-        const manualBtn = document.getElementById('manualBtn');
-        const urlBtn = document.getElementById('urlBtn');
-        const urlSection = document.getElementById('urlSection');
-        const extractBtn = document.getElementById('extractBtn');
-        const extractStatus = document.getElementById('extractStatus');
-        let currentMode = 'manual';
+    function renderShoppingList() {
+      if (!shoppingList.length) {
+        shoppingListEl.style.display = 'none';
+        emptyShoppingList.style.display = 'block';
+        shoppingTip.style.display = 'none';
+        return;
+      }
+      shoppingListEl.style.display = 'block';
+      emptyShoppingList.style.display = 'none';
+      shoppingTip.style.display = 'block';
 
-        manualBtn.addEventListener('click', () => {
-            currentMode = 'manual';
-            manualBtn.className = 'btn btn-primary';
-            urlBtn.className = 'btn';
-            urlBtn.style.background = '#6b7280';
-            urlBtn.style.color = 'white';
-            urlSection.style.display = 'none';
-        });
+      shoppingListEl.innerHTML = shoppingList.map(item => `
+        <div class="shopping-item ${item.checked ? 'checked' : ''}" onclick="toggleShoppingItem(${item.id})">
+          <input type="checkbox" ${item.checked ? 'checked' : ''} style="width:16px; height:16px;">
+          <span style="flex:1;">${item.text}</span>
+        </div>
+      `).join('');
+    }
 
-        urlBtn.addEventListener('click', () => {
-            currentMode = 'url';
-            urlBtn.className = 'btn btn-primary';
-            manualBtn.className = 'btn';
-            manualBtn.style.background = '#6b7280';
-            manualBtn.style.color = 'white';
-            urlSection.style.display = 'block';
-        });
+    // --- Edit flow (exposed) ---
+    function editRecipe(id) {
+      const recipe = recipes.find(r => r.id === id);
+      if (!recipe) return;
+      editingRecipeId = id;
 
-        // Recipe extraction from URL
-        extractBtn.addEventListener('click', async () => {
-            const url = document.getElementById('recipeUrl').value.trim();
-            if (!url) {
-                alert('Vul eerst een URL in');
-                return;
-            }
+      document.querySelector('#addRecipeModal h2').textContent = 'Recept Bewerken';
+      saveRecipeBtn.textContent = 'Wijzigingen Opslaan';
+      document.getElementById('portionSection').style.display = 'block';
 
-            extractStatus.textContent = '🔄 Recept ophalen...';
-            extractBtn.disabled = true;
+      document.getElementById('recipeTitle').value = recipe.title;
+      document.getElementById('recipePrepTime').value = recipe.prepTime || '';
+      document.getElementById('recipeServings').value = recipe.servings || '';
+      document.getElementById('recipeTags').value = (recipe.tags||[]).join(', ');
+      document.getElementById('recipeIngredients').value = (recipe.ingredients||[]).join('\n');
+      document.getElementById('recipeInstructions').value = recipe.instructions || '';
 
-            try {
-                const extractedData = await extractRecipeFromUrl(url);
-                
-                if (extractedData.success) {
-                    // Fill form with extracted data
-                    document.getElementById('recipeTitle').value = extractedData.title || '';
-                    document.getElementById('recipePrepTime').value = extractedData.prepTime || '';
-                    document.getElementById('recipeServings').value = extractedData.servings || '';
-                    document.getElementById('recipeIngredients').value = extractedData.ingredients || '';
-                    document.getElementById('recipeInstructions').value = extractedData.instructions || '';
-                    document.getElementById('recipeTags').value = extractedData.tags || '';
-                    
-                    extractStatus.innerHTML = `✅ Recept opgehaald! ${extractedData.confidence}% betrouwbaarheid`;
-                    extractStatus.style.color = '#10b981';
-                } else {
-                    extractStatus.innerHTML = `❌ ${extractedData.error}`;
-                    extractStatus.style.color = '#ef4444';
-                }
-            } catch (error) {
-                extractStatus.innerHTML = '❌ Fout bij ophalen recept. Probeer handmatig invoeren.';
-                extractStatus.style.color = '#ef4444';
-            }
+      openModal();
+    }
+    window.editRecipe = editRecipe;
 
-            extractBtn.disabled = false;
-        });
-
-        // Recipe extraction function
-        async function extractRecipeFromUrl(url) {
-            try {
-                extractStatus.innerHTML = '🔄 Bezig met ophalen...';
-                
-                // Try multiple proxy services for better reliability
-                const proxies = [
-                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-                    `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
-                ];
-                
-                let htmlContent = null;
-                let workingProxy = null;
-                
-                extractStatus.innerHTML = '🔄 Proberen verschillende servers...';
-                
-                // Try each proxy until one works
-                for (let i = 0; i < proxies.length; i++) {
-                    const proxy = proxies[i];
-                    try {
-                        extractStatus.innerHTML = `🔄 Server ${i + 1}/${proxies.length} proberen...`;
-                        console.log(`Trying proxy: ${proxy}`);
-                        
-                        const response = await fetch(proxy);
-                        
-                        if (response.ok) {
-                            const data = await response.text();
-                            // Handle different proxy response formats
-                            if (proxy.includes('allorigins')) {
-                                const jsonData = JSON.parse(data);
-                                htmlContent = jsonData.contents;
-                            } else {
-                                htmlContent = data;
-                            }
-                            
-                            if (htmlContent && htmlContent.length > 1000) {
-                                workingProxy = proxy;
-                                console.log(`Success with proxy: ${proxy}`);
-                                extractStatus.innerHTML = '🔄 Data gevonden, analyseren...';
-                                break;
-                            }
-                        }
-                    } catch (error) {
-                        console.log(`Proxy failed: ${proxy}`, error);
-                        continue;
-                    }
-                }
-                
-                if (!htmlContent) {
-                    console.log('No working proxy found');
-                    return { 
-                        success: false, 
-                        error: 'Kon website niet laden. AH/Allerhande blokkeert waarschijnlijk automatische toegang. Probeer handmatig kopiëren.' 
-                    };
-                }
-
-                console.log(`HTML content length: ${htmlContent.length}`);
-                console.log(`HTML preview: ${htmlContent.substring(0, 500)}`);
-
-                // Parse the HTML content
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlContent, 'text/html');
-                
-                // Debug: log what we can find
-                console.log('Page title:', doc.title);
-                console.log('H1 elements:', doc.querySelectorAll('h1').length);
-                console.log('All text content preview:', doc.body?.textContent?.substring(0, 300));
-                
-                extractStatus.innerHTML = '🔄 Receptgegevens zoeken...';
-                
-                // Try different extraction strategies
-                const extractedData = tryExtractStrategies(doc, url);
-                
-                return extractedData;
-                
-            } catch (error) {
-                console.error('Extraction error:', error);
-                return { 
-                    success: false, 
-                    error: `Technische fout: ${error.message}. Probeer handmatig invoeren.` 
-                };
-            }
-        }
-
-        function tryExtractStrategies(doc, url) {
-            let result = {
-                title: '',
-                ingredients: '',
-                instructions: '',
-                prepTime: '',
-                servings: '',
-                tags: '',
-                confidence: 0,
-                success: false
-            };
-
-            // Strategy 1: JSON-LD structured data (best)
-            const jsonLdData = extractFromJsonLd(doc);
-            if (jsonLdData.success) {
-                return { ...jsonLdData, confidence: 95 };
-            }
-
-            // Strategy 2: Site-specific extractors
-            if (url.includes('allerhande.nl') || url.includes('ah.nl')) {
-                const allerhandeData = extractFromAllerhande(doc);
-                if (allerhandeData.success) {
-                    return { ...allerhandeData, confidence: 85 };
-                }
-            }
-
-            if (url.includes('smulweb.nl')) {
-                const smulwebData = extractFromSmulweb(doc);
-                if (smulwebData.success) {
-                    return { ...smulwebData, confidence: 85 };
-                }
-            }
-
-            // Strategy 3: Generic HTML extraction (fallback)
-            const genericData = extractFromGenericHtml(doc);
-            if (genericData.success) {
-                return { ...genericData, confidence: 60 };
-            }
-
-            return { success: false, error: 'Geen receptgegevens gevonden op deze pagina' };
-        }
-
-        function extractFromJsonLd(doc) {
-            try {
-                const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-                
-                for (let script of scripts) {
-                    try {
-                        const data = JSON.parse(script.textContent);
-                        const recipes = Array.isArray(data) ? data : [data];
-                        
-                        for (let item of recipes) {
-                            if (item['@type'] === 'Recipe' || (item['@graph'] && item['@graph'].find(g => g['@type'] === 'Recipe'))) {
-                                const recipe = item['@type'] === 'Recipe' ? item : item['@graph'].find(g => g['@type'] === 'Recipe');
-                                
-                                const ingredients = recipe.recipeIngredient ? 
-                                    (Array.isArray(recipe.recipeIngredient) ? recipe.recipeIngredient.join('\n') : recipe.recipeIngredient) : '';
-                                
-                                const instructions = recipe.recipeInstructions ? 
-                                    recipe.recipeInstructions.map(inst => inst.text || inst).join('\n') : '';
-
-                                return {
-                                    success: true,
-                                    title: recipe.name || '',
-                                    ingredients: ingredients,
-                                    instructions: instructions,
-                                    prepTime: recipe.prepTime || recipe.totalTime || '',
-                                    servings: recipe.recipeYield || recipe.yield || '',
-                                    tags: recipe.recipeCategory || recipe.recipeCuisine || ''
-                                };
-                            }
-                        }
-                    } catch (e) {
-                        continue;
-                    }
-                }
-            } catch (error) {
-                console.log('JSON-LD extraction failed:', error);
-            }
-            
-            return { success: false };
-        }
-
-        function extractFromAllerhande(doc) {
-            try {
-                // Try multiple title selectors for AH
-                const title = doc.querySelector('h1, .recipe-header__title, [data-testhook="recipe-title"]')?.textContent?.trim() || '';
-                
-                // Try multiple ingredient selectors
-                let ingredients = '';
-                const ingredientSelectors = [
-                    '[data-testhook="recipe-ingredient"]',
-                    '.recipe-ingredients__item',
-                    '.ingredients-list__item',
-                    '.recipe-ingredient',
-                    'li[class*="ingredient"]',
-                    '.ah-ingredient'
-                ];
-                
-                for (let selector of ingredientSelectors) {
-                    const elements = doc.querySelectorAll(selector);
-                    if (elements.length > 0) {
-                        ingredients = Array.from(elements).map(el => {
-                            // Clean up the text - remove extra whitespace and unwanted elements
-                            const text = el.textContent?.trim() || '';
-                            return text.replace(/\s+/g, ' ');
-                        }).filter(text => text.length > 0).join('\n');
-                        if (ingredients) break;
-                    }
-                }
-                
-                // Try multiple instruction selectors
-                let instructions = '';
-                const instructionSelectors = [
-                    '[data-testhook="recipe-instruction"]',
-                    '.recipe-method__step',
-                    '.recipe-instructions__step',
-                    '.preparation-step',
-                    'ol li, .steps li'
-                ];
-                
-                for (let selector of instructionSelectors) {
-                    const elements = doc.querySelectorAll(selector);
-                    if (elements.length > 0) {
-                        instructions = Array.from(elements).map((el, index) => {
-                            const text = el.textContent?.trim() || '';
-                            return `${index + 1}. ${text.replace(/\s+/g, ' ')}`;
-                        }).filter(text => text.length > 3).join('\n\n');
-                        if (instructions) break;
-                    }
-                }
-                
-                // Try to find prep time
-                const prepTimeSelectors = [
-                    '[data-testhook="recipe-duration"]',
-                    '.recipe-time',
-                    '.prep-time',
-                    '.cooking-time',
-                    '[class*="duration"]',
-                    '[class*="time"]'
-                ];
-                
-                let prepTime = '';
-                for (let selector of prepTimeSelectors) {
-                    const element = doc.querySelector(selector);
-                    if (element) {
-                        prepTime = element.textContent?.trim() || '';
-                        if (prepTime) break;
-                    }
-                }
-                
-                // Try to find servings
-                const servingSelectors = [
-                    '[data-testhook="recipe-portions"]',
-                    '.recipe-portions',
-                    '.servings',
-                    '.yield',
-                    '[class*="portion"]',
-                    '[class*="serving"]'
-                ];
-                
-                let servings = '';
-                for (let selector of servingSelectors) {
-                    const element = doc.querySelector(selector);
-                    if (element) {
-                        servings = element.textContent?.trim() || '';
-                        if (servings) break;
-                    }
-                }
-
-                console.log('AH Extraction results:', { title, ingredients: ingredients.substring(0, 100), instructions: instructions.substring(0, 100) });
-
-                if (title && (ingredients || instructions)) {
-                    return {
-                        success: true,
-                        title,
-                        ingredients: ingredients || 'Geen ingrediënten gevonden - vul handmatig aan',
-                        instructions: instructions || 'Geen instructies gevonden - vul handmatig aan',
-                        prepTime,
-                        servings,
-                        tags: 'allerhande'
-                    };
-                }
-            } catch (error) {
-                console.log('Allerhande extraction failed:', error);
-            }
-            
-            return { success: false };
-        }
-
-        function extractFromSmulweb(doc) {
-            try {
-                const title = doc.querySelector('h1, .recipe-title')?.textContent?.trim() || '';
-                
-                const ingredientElements = doc.querySelectorAll('.ingredients li, .recipe-ingredients li');
-                const ingredients = Array.from(ingredientElements).map(el => el.textContent.trim()).join('\n');
-                
-                const instructionElements = doc.querySelectorAll('.directions li, .instructions li, .recipe-method li');
-                const instructions = Array.from(instructionElements).map(el => el.textContent.trim()).join('\n');
-
-                if (title && ingredients) {
-                    return {
-                        success: true,
-                        title,
-                        ingredients,
-                        instructions,
-                        prepTime: '',
-                        servings: '',
-                        tags: 'smulweb'
-                    };
-                }
-            } catch (error) {
-                console.log('Smulweb extraction failed:', error);
-            }
-            
-            return { success: false };
-        }
-
-        function extractFromGenericHtml(doc) {
-            try {
-                // Try to find title
-                const titleSelectors = [
-                    'h1',
-                    '.recipe-title', 
-                    '.entry-title',
-                    '[class*="title"]',
-                    'title'
-                ];
-                
-                let title = '';
-                for (let selector of titleSelectors) {
-                    const element = doc.querySelector(selector);
-                    if (element) {
-                        title = element.textContent?.trim() || '';
-                        if (title && title.length > 3) break;
-                    }
-                }
-                
-                // Try to find ingredients with better patterns
-                const ingredientSelectors = [
-                    '.ingredients li',
-                    '.recipe-ingredients li',
-                    'ul li',
-                    'ol li',
-                    '[class*="ingredient"] li',
-                    'li[class*="ingredient"]'
-                ];
-                
-                let ingredients = '';
-                for (let selector of ingredientSelectors) {
-                    const elements = doc.querySelectorAll(selector);
-                    if (elements.length >= 3) { // At least 3 items
-                        const possibleIngredients = Array.from(elements).map(el => {
-                            const text = el.textContent?.trim() || '';
-                            return text.replace(/\s+/g, ' ');
-                        }).filter(text => {
-                            // Filter for likely ingredients (contains numbers, common units, etc.)
-                            return text.length > 2 && 
-                                   (text.match(/\d/) || 
-                                    text.match(/gram|ml|liter|stuks|eetlepel|theelepel|kilo|pond/) ||
-                                    text.length < 50); // Not too long (likely not instructions)
-                        });
-                        
-                        if (possibleIngredients.length >= 3) {
-                            ingredients = possibleIngredients.join('\n');
-                            break;
-                        }
-                    }
-                }
-
-                // Try to find instructions
-                const instructionSelectors = [
-                    '.instructions li',
-                    '.recipe-method li',
-                    '.directions li',
-                    '.preparation li',
-                    'ol li',
-                    '[class*="instruction"] li'
-                ];
-                
-                let instructions = '';
-                for (let selector of instructionSelectors) {
-                    const elements = doc.querySelectorAll(selector);
-                    if (elements.length >= 2) {
-                        const possibleInstructions = Array.from(elements).map((el, index) => {
-                            const text = el.textContent?.trim() || '';
-                            return text.length > 10 ? `${index + 1}. ${text.replace(/\s+/g, ' ')}` : '';
-                        }).filter(text => text.length > 10);
-                        
-                        if (possibleInstructions.length >= 2) {
-                            instructions = possibleInstructions.join('\n\n');
-                            break;
-                        }
-                    }
-                }
-
-                console.log('Generic extraction results:', { 
-                    title, 
-                    ingredientsFound: ingredients.split('\n').length,
-                    instructionsFound: instructions.split('\n').length 
-                });
-
-                if (title && (ingredients || instructions)) {
-                    return {
-                        success: true,
-                        title,
-                        ingredients: ingredients || 'Geen ingrediënten gevonden - vul handmatig aan',
-                        instructions: instructions || 'Geen instructies gevonden - vul handmatig aan',
-                        prepTime: '',
-                        servings: '',
-                        tags: 'generic'
-                    };
-                }
-            } catch (error) {
-                console.log('Generic extraction failed:', error);
-            }
-            
-            return { success: false };
-        }
-
-        // Edit recipe functionality
-        function editRecipe(id) {
-            const recipe = recipes.find(r => r.id === id);
-            if (!recipe) return;
-
-            editingRecipeId = id;
-            
-            // Fill form with existing data
-            document.getElementById('recipeTitle').value = recipe.title;
-            document.getElementById('recipePrepTime').value = recipe.prepTime || '';
-            document.getElementById('recipeServings').value = recipe.servings || '';
-            document.getElementById('recipeTags').value = recipe.tags ? recipe.tags.join(', ') : '';
-            document.getElementById('recipeIngredients').value = recipe.ingredients ? recipe.ingredients.join('\n') : '';
-            document.getElementById('recipeInstructions').value = recipe.instructions || '';
-            
-            // Change modal title and button
-            document.querySelector('#addRecipeModal h2').textContent = 'Recept Bewerken';
-            document.getElementById('saveRecipeBtn').textContent = 'Wijzigingen Opslaan';
-            
-            // Show portion adjuster
-            document.getElementById('portionSection').style.display = 'block';
-            
-            openModal();
-        }
-
-        // Portion adjustment functionality
-        document.getElementById('adjustPortionsBtn').addEventListener('click', () => {
-            const newPortions = parseInt(document.getElementById('newPortions').value);
-            const currentIngredients = document.getElementById('recipeIngredients').value;
-            
-            if (!newPortions || newPortions < 1) {
-                alert('Vul een geldig aantal personen in');
-                return;
-            }
-
-            const adjustedIngredients = adjustIngredientPortions(currentIngredients, newPortions);
-            document.getElementById('recipeIngredients').value = adjustedIngredients;
-            document.getElementById('recipeServings').value = `${newPortions} personen`;
-            
-            document.getElementById('portionNote').innerHTML = `✅ Ingrediënten aangepast voor ${newPortions} personen!`;
-            document.getElementById('portionNote').style.color = '#059669';
-        });
-
-        function adjustIngredientPortions(ingredientsText, newPortions) {
-            const lines = ingredientsText.split('\n');
-            const originalPortions = 4; // Default assumption, could be made smarter
-            const multiplier = newPortions / originalPortions;
-            
-            return lines.map(line => {
-                // Match numbers at the start of ingredient lines
-                return line.replace(/^(\d+(?:\.\d+)?)\s*(gram|g|ml|liter|l|kg|stuks?|eetlepels?|theelepels?|el|tl)\b/i, (match, amount, unit) => {
-                    const originalAmount = parseFloat(amount);
-                    const newAmount = Math.round(originalAmount * multiplier * 10) / 10; // Round to 1 decimal
-                    return `${newAmount} ${unit}`;
-                });
-            }).join('\n');
-        }
-
-        // Save recipe
-        saveRecipeBtn.addEventListener('click', () => {
-            const title = document.getElementById('recipeTitle').value.trim();
-            const ingredients = document.getElementById('recipeIngredients').value.trim();
-            
-            if (!title || !ingredients) {
-                alert('Vul minimaal titel en ingrediënten in');
-                return;
-            }
-
-            const recipe = {
-                id: editingRecipeId || Date.now(),
-                title,
-                prepTime: document.getElementById('recipePrepTime').value,
-                servings: document.getElementById('recipeServings').value,
-                tags: document.getElementById('recipeTags').value.split(',').map(t => t.trim()).filter(t => t),
-                ingredients: ingredients.split('\n').filter(i => i.trim()),
-                instructions: document.getElementById('recipeInstructions').value,
-                dateAdded: editingRecipeId ? 
-                    recipes.find(r => r.id === editingRecipeId)?.dateAdded || new Date().toLocaleDateString('nl-NL') :
-                    new Date().toLocaleDateString('nl-NL')
-            };
-
-            if (editingRecipeId) {
-                // Update existing recipe
-                const index = recipes.findIndex(r => r.id === editingRecipeId);
-                if (index !== -1) {
-                    recipes[index] = recipe;
-                }
-            } else {
-                // Add new recipe
-                recipes.unshift(recipe);
-            }
-
-            saveData();
-            renderRecipes();
-            closeModalFunc();
-        });
-
-        // Shopping list buttons
-        copyListBtn.addEventListener('click', () => {
-            const uncheckedItems = shoppingList
-                .filter(item => !item.checked)
-                .map(item => item.text)
-                .join('\n');
-            
-            if (uncheckedItems) {
-                navigator.clipboard.writeText(uncheckedItems).then(() => {
-                    alert('Boodschappenlijst gekopieerd! 📋\nPlak in je iPhone Herinneringen app.');
-                });
-            }
-        });
-
-        clearListBtn.addEventListener('click', () => {
-            if (confirm('Wil je de hele boodschappenlijst wissen?')) {
-                shoppingList = [];
-                saveData();
-                renderShoppingList();
-            }
-        });
-
-        // Global Functions
-        function deleteRecipe(id) {
-            if (confirm('Weet je zeker dat je dit recept wilt verwijderen?')) {
-                recipes = recipes.filter(recipe => recipe.id !== id);
-                saveData();
-                renderRecipes();
-            }
-        }
-
-        function addToShopping(recipeId) {
-            const recipe = recipes.find(r => r.id === recipeId);
-            if (recipe) {
-                const newItems = recipe.ingredients.map(ing => ({
-                    id: Date.now() + Math.random(),
-                    text: ing.replace(/^-\s*/, '').trim(),
-                    checked: false
-                }));
-                shoppingList.push(...newItems);
-                saveData();
-                renderShoppingList();
-            }
-        }
-
-        function viewRecipe(id) {
-            const recipe = recipes.find(r => r.id === id);
-            if (recipe) {
-                alert(`${recipe.title}\n\nIngrediënten:\n${recipe.ingredients.join('\n')}\n\nBereidingswijze:\n${recipe.instructions || 'Geen instructies toegevoegd'}`);
-            }
-        }
-
-        function toggleShoppingItem(id) {
-            const item = shoppingList.find(item => item.id === id);
-            if (item) {
-                item.checked = !item.checked;
-                saveData();
-                renderShoppingList();
-            }
-        }
-
-        // Render Functions
-        function renderRecipes() {
-            if (recipes.length === 0) {
-                recipeGrid.style.display = 'none';
-                emptyRecipes.style.display = 'block';
-                return;
-            }
-
-            recipeGrid.style.display = 'grid';
-            emptyRecipes.style.display = 'none';
-
-            recipeGrid.innerHTML = recipes.map(recipe => `
-                <div class="recipe-card" onclick="viewRecipe(${recipe.id})">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <h3 class="recipe-title">${recipe.title}</h3>
-                        <div style="display: flex; gap: 4px;">
-                            <button onclick="event.stopPropagation(); editRecipe(${recipe.id})" 
-                                    style="background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 1.2rem;">
-                                ✏️
-                            </button>
-                            <button onclick="event.stopPropagation(); deleteRecipe(${recipe.id})" 
-                                    style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">
-                                🗑️
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="recipe-meta">
-                        ${recipe.prepTime ? `<span>⏱️ ${recipe.prepTime}</span>` : ''}
-                        ${recipe.servings ? `<span>👥 ${recipe.servings}</span>` : ''}
-                    </div>
-                    
-                    ${recipe.tags.length > 0 ? `
-                        <div class="recipe-tags">
-                            ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                        </div>
-                    ` : ''}
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
-                        <span style="font-size: 0.75rem; color: #6b7280;">
-                            Toegevoegd: ${recipe.dateAdded}
-                        </span>
-                        <button onclick="event.stopPropagation(); addToShopping(${recipe.id})" 
-                                class="btn" style="background: #3b82f6; color: white; padding: 6px 12px; font-size: 0.875rem;">
-                            + Boodschappen
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderShoppingList() {
-            if (shoppingList.length === 0) {
-                shoppingListEl.style.display = 'none';
-                emptyShoppingList.style.display = 'block';
-                shoppingTip.style.display = 'none';
-                return;
-            }
-
-            shoppingListEl.style.display = 'block';
-            emptyShoppingList.style.display = 'none';
-            shoppingTip.style.display = 'block';
-
-            shoppingListEl.innerHTML = shoppingList.map(item => `
-                <div class="shopping-item ${item.checked ? 'checked' : ''}" 
-                     onclick="toggleShoppingItem(${item.id})">
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} 
-                           style="width: 16px; height: 16px;">
-                    <span style="flex: 1;">${item.text}</span>
-                </div>
-            `).join('');
-        }
-
-        // Initialize app
-        loadData();
-    </script>
+    // --- Init ---
+    loadData();
+  </script>
 </body>
 </html>
